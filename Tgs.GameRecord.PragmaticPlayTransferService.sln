@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.PragmaticPlayTransferService.Core", "Tgs.GameRecord.PragmaticPlayTransferService.Core\Tgs.GameRecord.PragmaticPlayTransferService.Core.csproj", "{9F7A7256-33F2-4ECE-8094-54E53AB09B20}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.PragmaticPlayTransferService", "Tgs.GameRecord.PragmaticPlayTransferService\Tgs.GameRecord.PragmaticPlayTransferService.csproj", "{A2EA295D-DDCF-4316-873D-80D6BE2ED46E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CFEFB0D4-C072-42D4-A029-30A25A3AC514}"
+	ProjectSection(SolutionItems) = preProject
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F7A7256-33F2-4ECE-8094-54E53AB09B20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F7A7256-33F2-4ECE-8094-54E53AB09B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F7A7256-33F2-4ECE-8094-54E53AB09B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F7A7256-33F2-4ECE-8094-54E53AB09B20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2EA295D-DDCF-4316-873D-80D6BE2ED46E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2EA295D-DDCF-4316-873D-80D6BE2ED46E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2EA295D-DDCF-4316-873D-80D6BE2ED46E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2EA295D-DDCF-4316-873D-80D6BE2ED46E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C71D6003-4AE8-45AD-B216-6718096CB949}
+	EndGlobalSection
+EndGlobal
