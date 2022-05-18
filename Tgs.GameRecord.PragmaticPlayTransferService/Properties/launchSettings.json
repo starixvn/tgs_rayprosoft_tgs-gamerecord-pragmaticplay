@@ -1,13 +1,5 @@
 ﻿{
   "$schema": "https://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:17426",
-      "sslPort": 0
-    }
-  },
   "profiles": {
     "Tgs.GameRecords.PragmaticPlayTransferService": {
       "commandName": "Project",
@@ -16,15 +8,20 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5076",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "Game-Gamerecord-PPTF-Service(local)",
+        "NODE_IP": "otel.rpgp.cc"
       }
     },
-    "IIS Express": {
-      "commandName": "IISExpress",
+    "Docker": {
+      "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "swagger",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "publishAllPorts": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "Game-Gamerecord-PPTF-Service(local)",
+        "NODE_IP": "otel.rpgp.cc"
       }
     }
   }
