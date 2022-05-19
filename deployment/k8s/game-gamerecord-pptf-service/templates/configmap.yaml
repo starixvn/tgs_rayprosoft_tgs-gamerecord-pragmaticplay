@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "game-gamerecord-pptf-service.fullname" . }}
+  labels:
+    {{- include "game-gamerecord-pptf-service.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+      "GameRecord": {
+        "GameProvidersBaseUrl": "http://game-gameproviders",
+        "GameProvidersQueryServerBaseUrl": "http://game-gameprovider-queryserver",
+        "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
+      }
+    }
