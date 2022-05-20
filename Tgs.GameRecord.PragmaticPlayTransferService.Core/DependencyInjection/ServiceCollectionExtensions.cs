@@ -21,9 +21,8 @@ public static class ServiceCollectionExtensions
             .AddGameProvidersClient(gameProvidersClientOptions)
             .AddGameProvidersQueryServerClient(gameProvidersQueryServerClientOptions)
             .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
-            .AddTransient<IPlayerService, PlayerService>()
-            .AddTransient<IGameProviderService, GameProviderService>()
-            .AddTransient<IGameService, GameService>()
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
-            .AddTransient<IGameRecordMessageSender, GameRecordMessageSender>();
+            .AddTransient<IGameRecordMessageSender, GameRecordMessageSender>()
+            .AddTransient<IGameProvidersQueryService, GameProvidersQueryService>()
+            .Decorate<IGameProvidersQueryService, GameProvidersQueryMemoryCachedService>();
 }

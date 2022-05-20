@@ -13,9 +13,7 @@ internal class GameRecordHandleServiceUnitTests
     [Test]
     public async Task Normal_Process()
     {
-        var fakeGameProviderService = Substitute.For<IGameProviderService>();
-        var fakePlayerService = Substitute.For<IPlayerService>();
-        var fakeGameService = Substitute.For<IGameService>();
+        var fakeGameProvidersQueryService = Substitute.For<IGameProvidersQueryService>();
         var fakeGameRecordMessageSender = Substitute.For<IGameRecordMessageSender>();
 
         var gameRecord = new GameRecordInfo(
@@ -37,32 +35,42 @@ internal class GameRecordHandleServiceUnitTests
             null,
             string.Empty);
 
-        var playerInfo = new PlayerInfo(
+        var playerInfo = new PlayerModel(
             Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"),
-            gameRecord.PlayerCode,
-            "CNY",
+            "TGS",
             Guid.Parse("36a6cdef-094f-eb11-8d88-70b5e82b6b8d"),
-            Guid.NewGuid());
+            "TGS",
+            Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"),
+            "GPI",
+            gameRecord.PlayerCode,
+            gameRecord.PlayerCode,
+            Guid.Parse("36a6cdef-094f-eb11-8d88-70b5e82b6b8d"),
+            "CNY",
+            PlayerStatus.Enabled);
 
-        _ = fakeGameProviderService.GetGameProviderIdAsync(Arg.Is(gameRecord.GameProviderCode))
+        var gameProviderConfigurationId = Guid.NewGuid();
+
+        _ = fakeGameProvidersQueryService.GetGameProviderIdAsync(Arg.Is(gameRecord.GameProviderCode))
             .Returns(gameRecord.GameProviderId);
 
-        _ = fakePlayerService.GetAsync(
-                Arg.Is(gameRecord.GameProviderId),
+        _ = fakeGameProvidersQueryService.GetPlayerAsync(
                 Arg.Is(gameRecord.PlayerCode))
             .Returns(playerInfo);
 
-        _ = fakeGameService.GetGameIdAsync(
+        _ = fakeGameProvidersQueryService.GetGameIdAsync(
                 Arg.Is(gameRecord.GameProviderId),
                 Arg.Is(gameRecord.ExternalGameId))
             .Returns(2700258);
 
+        _ = fakeGameProvidersQueryService.GetBrandGetGameProviderConfigurationIdAsync(
+                Arg.Is(playerInfo.BrandId),
+                Arg.Is(gameRecord.GameProviderId))
+            .Returns(gameProviderConfigurationId);
+
         var query = new GameRoundHandleQuery(gameRecord);
 
         var sut = new GameRecordHandleService(
-            fakeGameProviderService,
-            fakeGameService,
-            fakePlayerService,
+            fakeGameProvidersQueryService,
             fakeGameRecordMessageSender);
 
         var actual = await sut.GetAsync(query);

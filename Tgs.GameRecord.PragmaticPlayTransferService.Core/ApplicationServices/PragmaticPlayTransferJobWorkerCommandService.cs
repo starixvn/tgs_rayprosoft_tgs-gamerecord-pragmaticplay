@@ -7,18 +7,18 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 
 internal class PragmaticPlayTransferJobWorkerCommandService : ICommandService<PragmaticPlayTransferJobWorkerCommand>
 {
-    private readonly IGameProviderService _gameProviderService;
+    private readonly IGameProvidersQueryService _gameProvidersQueryService;
     private readonly IGetService<GameRecordQuery, GameRecordResult> _gameRecordQueryService;
     private readonly ILogger<PragmaticPlayTransferJobWorkerCommandService> _logger;
     private readonly IGameRecordScheduleService _scheduleService;
 
     public PragmaticPlayTransferJobWorkerCommandService(
-        IGameProviderService gameProviderService,
+        IGameProvidersQueryService gameProvidersQueryService,
         IGameRecordScheduleService scheduleService,
         IGetService<GameRecordQuery, GameRecordResult> gameRecordQueryService,
         ILogger<PragmaticPlayTransferJobWorkerCommandService> logger)
     {
-        _gameProviderService = gameProviderService ?? throw new ArgumentNullException(nameof(gameProviderService));
+        _gameProvidersQueryService = gameProvidersQueryService ?? throw new ArgumentNullException(nameof(gameProvidersQueryService));
         _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
         _gameRecordQueryService = gameRecordQueryService ?? throw new ArgumentNullException(nameof(gameRecordQueryService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -30,9 +30,15 @@ internal class PragmaticPlayTransferJobWorkerCommandService : ICommandService<Pr
     {
         var gameDataTypes = Enum.GetValues(typeof(PragmaticPlayTransferGameDataType)).Cast<PragmaticPlayTransferGameDataType>();
 
-        var gameProviderId = await _gameProviderService
+        var gameProviderId = await _gameProvidersQueryService
             .GetGameProviderIdAsync(GameProviderType.PragmaticPlayTransfer)
             .ConfigureAwait(false);
+
+        if (!gameProviderId.HasValue)
+        {
+            _logger.LogError("Can't find game provider id of {gpCode}", GameProviderType.PragmaticPlayTransfer);
+            return;
+        }
 
         foreach (var gameDataType in gameDataTypes)
         {
@@ -42,7 +48,7 @@ internal class PragmaticPlayTransferJobWorkerCommandService : ICommandService<Pr
                                    .GetAsync(gameDataType, cancellationToken)
                                    .ConfigureAwait(false)
                                ?? await _scheduleService
-                                   .InitAsync(gameProviderId, gameDataType, cancellationToken)
+                                   .InitAsync(gameProviderId.Value, gameDataType, cancellationToken)
                                    .ConfigureAwait(false);
 
                 var sysTime = DateTimeOffset.UtcNow;
