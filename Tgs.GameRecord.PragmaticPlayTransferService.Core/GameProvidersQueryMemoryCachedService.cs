@@ -1,13 +1,10 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Tgs.GameProviders.QueryServer.Models;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryService
 {
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _lockObjects = new();
-
     private readonly IMemoryCache _memoryCache;
     private readonly IGameProvidersQueryService _queryService;
 
@@ -26,29 +23,13 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out Guid? configurationId))
             return configurationId;
 
-        var lockObject = _lockObjects.GetOrAdd(
-            cacheKey,
-            _ => new SemaphoreSlim(1, 1));
+        configurationId = await _queryService
+               .GetBrandGetGameProviderConfigurationIdAsync(brandId, gameProviderId)
+               .ConfigureAwait(false);
 
-        await lockObject.WaitAsync().ConfigureAwait(false);
-
-        try
+        if (configurationId.HasValue)
         {
-            if (!_memoryCache.TryGetValue(cacheKey, out configurationId))
-            {
-                configurationId = await _queryService
-                    .GetBrandGetGameProviderConfigurationIdAsync(brandId, gameProviderId)
-                    .ConfigureAwait(false);
-
-                if (configurationId.HasValue)
-                {
-                    _ = _memoryCache.Set(cacheKey, configurationId, TimeSpan.FromHours(1));
-                }
-            }
-        }
-        finally
-        {
-            _ = lockObject.Release();
+            _ = _memoryCache.Set(cacheKey, configurationId, TimeSpan.FromHours(1));
         }
 
         return configurationId;
@@ -61,29 +42,13 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out int? gameId))
             return gameId;
 
-        var lockObject = _lockObjects.GetOrAdd(
-            cacheKey,
-            _ => new SemaphoreSlim(1, 1));
+        gameId = await _queryService
+            .GetGameIdAsync(gameProviderId, gameExternalId)
+            .ConfigureAwait(false);
 
-        await lockObject.WaitAsync().ConfigureAwait(false);
-
-        try
+        if (gameId.HasValue)
         {
-            if (!_memoryCache.TryGetValue(cacheKey, out gameId))
-            {
-                gameId = await _queryService
-                    .GetGameIdAsync(gameProviderId, gameExternalId)
-                    .ConfigureAwait(false);
-
-                if (gameId.HasValue)
-                {
-                    _ = _memoryCache.Set(cacheKey, gameId, TimeSpan.FromHours(1));
-                }
-            }
-        }
-        finally
-        {
-            _ = lockObject.Release();
+            _ = _memoryCache.Set(cacheKey, gameId, TimeSpan.FromHours(1));
         }
 
         return gameId;
@@ -96,28 +61,12 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out Guid? gameProviderId))
             return gameProviderId;
 
-        var lockObject = _lockObjects.GetOrAdd(
-            cacheKey,
-            _ => new SemaphoreSlim(1, 1));
+        gameProviderId = await _queryService.GetGameProviderIdAsync(gameProviderCode)
+                .ConfigureAwait(false);
 
-        await lockObject.WaitAsync().ConfigureAwait(false);
-
-        try
+        if (!gameProviderId.HasValue)
         {
-            if (!_memoryCache.TryGetValue(cacheKey, out gameProviderId))
-            {
-                gameProviderId = await _queryService.GetGameProviderIdAsync(gameProviderCode)
-                    .ConfigureAwait(false);
-
-                if (!gameProviderId.HasValue)
-                {
-                    _ = _memoryCache.Set(cacheKey, gameProviderId, TimeSpan.FromHours(1));
-                }
-            }
-        }
-        finally
-        {
-            _ = lockObject.Release();
+            _ = _memoryCache.Set(cacheKey, gameProviderId, TimeSpan.FromDays(1));
         }
 
         return gameProviderId;
@@ -130,28 +79,12 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out PlayerModel? player))
             return player;
 
-        var lockObject = _lockObjects.GetOrAdd(
-            cacheKey,
-            _ => new SemaphoreSlim(1, 1));
+        player = await _queryService.GetPlayerAsync(playerCode)
+            .ConfigureAwait(false);
 
-        await lockObject.WaitAsync().ConfigureAwait(false);
-
-        try
+        if (player is not null)
         {
-            if (!_memoryCache.TryGetValue(cacheKey, out player))
-            {
-                player = await _queryService.GetPlayerAsync(playerCode)
-                    .ConfigureAwait(false);
-
-                if (player is not null)
-                {
-                    _ = _memoryCache.Set(playerCode, player, TimeSpan.FromHours(1));
-                }
-            }
-        }
-        finally
-        {
-            _ = lockObject.Release();
+            _ = _memoryCache.Set(cacheKey, player, TimeSpan.FromDays(1));
         }
 
         return player;
