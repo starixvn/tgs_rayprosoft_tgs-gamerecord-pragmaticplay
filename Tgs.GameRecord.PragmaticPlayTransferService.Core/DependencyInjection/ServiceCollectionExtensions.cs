@@ -10,19 +10,26 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPragmaticPlayTransferGameRecordService(
+    public static IServiceCollection AddGameRecordServiceCore(
         this IServiceCollection services,
+        Action<GameRecordInfoOptions, IServiceProvider> configure,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
         Action<GameProvidersQueryServerClientOptions, IServiceProvider> gameProvidersQueryServerClientOptions,
         Action<GameRecordSchedulesClientOptions, IServiceProvider> gameRecordSchedulesClientOptions)
-        => services.RegisterAllServiceUtilityTypes(
+        => services
+            .AddOptions<GameRecordInfoOptions>()
+            .Configure(configure)
+            .Services
+            .RegisterAllServiceUtilityTypes(
                 Assembly.GetExecutingAssembly(),
                 ServiceLifetime.Transient)
             .AddGameProvidersClient(gameProvidersClientOptions)
             .AddGameProvidersQueryServerClient(gameProvidersQueryServerClientOptions)
             .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
+            .AddScoped<ISystemClock, SystemClock>()
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
-            .AddTransient<IGameRecordMessageSender, GameRecordMessageSender>()
-            .AddTransient<IGameProvidersQueryService, GameProvidersQueryService>()
-            .Decorate<IGameProvidersQueryService, GameProvidersQueryMemoryCachedService>();
+            .AddTransient<IUtensil, UtensilRepository>()
+            .Decorate<IUtensil>((inner, sp) =>
+                ActivatorUtilities.CreateInstance<UtensilMemoryCachedRepository>(sp,
+                    inner, TimeSpan.FromHours(1)));
 }

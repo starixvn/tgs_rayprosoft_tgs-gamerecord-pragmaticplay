@@ -1,19 +1,19 @@
 using System.Text.Json;
 using Tgs.GameProviders.Domains;
-using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.PragmaticPlayTransferService.ReceiveHandler;
+namespace Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 
-public class PragmaticPlayTransferReceiveHandler : IMessageHandler
+public class ScheduleMessageHandler : IMessageHandler
 {
-    private readonly ICommandService<PragmaticPlayTransferJobWorkerCommand> _commandService;
-    private readonly ILogger<PragmaticPlayTransferReceiveHandler> _logger;
+    private readonly ICommandService<JobWorkerCommand> _commandService;
+    private readonly ILogger<ScheduleMessageHandler> _logger;
 
-    public PragmaticPlayTransferReceiveHandler(
-        ICommandService<PragmaticPlayTransferJobWorkerCommand> commandService,
-        ILogger<PragmaticPlayTransferReceiveHandler> logger)
+    public ScheduleMessageHandler(
+        ICommandService<JobWorkerCommand> commandService,
+        ILogger<ScheduleMessageHandler> logger)
     {
         _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -21,7 +21,7 @@ public class PragmaticPlayTransferReceiveHandler : IMessageHandler
 
     public ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
-        var command = JsonSerializer.Deserialize<PragmaticPlayTransferCommand>(data.Span);
+        var command = JsonSerializer.Deserialize<ScheduleMessageModel>(data.Span);
 
         var logInfo = new
         {
@@ -38,6 +38,6 @@ public class PragmaticPlayTransferReceiveHandler : IMessageHandler
 
         _logger.LogInformation("Information Received:{LogInfo}", logInfo);
 
-        return _commandService.ExecuteAsync(new PragmaticPlayTransferJobWorkerCommand(), cancellationToken);
+        return _commandService.ExecuteAsync(new JobWorkerCommand(), cancellationToken);
     }
 }

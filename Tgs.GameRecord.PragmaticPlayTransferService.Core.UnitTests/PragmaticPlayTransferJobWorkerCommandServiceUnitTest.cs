@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
 using Tgs.GameRecordSchedules.Protos;
 using Tgs.ServiceUtility;
 
@@ -18,7 +19,7 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
     public async Task Normal_Process()
     {
         var fakeGameRecordScheduleService = Substitute.For<IGameRecordScheduleService>();
-        var fakeGameProvidersQueryService = Substitute.For<IGameProvidersQueryService>();
+        var fakeGameProvidersQueryService = Substitute.For<IUtensil>();
         var fakeGameRecordQueryService = Substitute.For<IGetService<GameRecordQuery, GameRecordResult>>();
 
         var gameProviderId = Guid.Parse("e4ecfa98-b373-4123-87e0-cb9e883d0691");
@@ -57,7 +58,7 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             dataType,
             scheduleConfig.StartTime);
 
-        _ = fakeGameProvidersQueryService.GetGameProviderIdAsync(Arg.Is(GameProviderType.PragmaticPlayTransfer))
+        _ = fakeGameProvidersQueryService.GetGameProviderIdAsync()
          .Returns(gameProviderId);
 
         _ = fakeGameRecordScheduleService
@@ -71,13 +72,13 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
         _ = fakeGameRecordQueryService.GetAsync(Arg.Is(gameRecordQuery))
             .Returns(gameRecordResult);
 
-        var sut = new PragmaticPlayTransferJobWorkerCommandService(
+        var sut = new JobWorkerCommandService(
             fakeGameProvidersQueryService,
             fakeGameRecordScheduleService,
             fakeGameRecordQueryService,
-            NullLogger<PragmaticPlayTransferJobWorkerCommandService>.Instance);
+            NullLogger<JobWorkerCommandService>.Instance);
 
-        await sut.ExecuteAsync(new PragmaticPlayTransferJobWorkerCommand()).ConfigureAwait(false);
+        await sut.ExecuteAsync(new JobWorkerCommand()).ConfigureAwait(false);
 
         _ = fakeGameRecordScheduleService
             .Received(1)

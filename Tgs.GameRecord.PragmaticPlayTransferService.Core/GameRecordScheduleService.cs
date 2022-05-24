@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Options;
 using Tgs.GameProviders.Client;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecordSchedules.Client;
 using Tgs.GameRecordSchedules.Protos;
 
@@ -8,13 +8,18 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 internal class GameRecordScheduleService : IGameRecordScheduleService
 {
-    private static readonly string _GameProviderCode = GameProviderType.PragmaticPlayTransfer;
+    private readonly GameRecordInfoOptions _gameRecordInfo;
     private readonly IGameRecordSchedulesGrpc _scheduleClient;
+    private readonly ISystemClock _systemClock;
 
     public GameRecordScheduleService(
-        IGameRecordSchedulesGrpc scheduleClient)
+        IGameRecordSchedulesGrpc scheduleClient,
+        ISystemClock systemClock,
+        IOptions<GameRecordInfoOptions> options)
     {
         _scheduleClient = scheduleClient ?? throw new ArgumentNullException(nameof(scheduleClient));
+        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+        _gameRecordInfo = options.Value;
     }
 
     public ValueTask<GameRecordScheduleReply?> GetAsync(
@@ -23,7 +28,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
     {
         var request = new GameRecordScheduleGetRequest
         {
-            GameProviderCode = $"{_GameProviderCode}_{gameDataType}",
+            GameProviderCode = $"{_gameRecordInfo.GameProviderCode}_{gameDataType}",
             BrandCode = string.Empty,
             GameProviderAgentId = string.Empty,
             CurrencyCode = string.Empty
@@ -40,9 +45,9 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         PragmaticPlayTransferGameDataType gameDataType,
         CancellationToken cancellationToken)
     {
-        var sysTime = DateTimeOffset.UtcNow;
-        var intervalMinuteMax = 10m;
-        var intervalMinute = 10m;
+        var sysTime = _systemClock.CurrentTime;
+        var intervalMinuteMax = _gameRecordInfo.IntervalMinuteMax;
+        var intervalMinute = _gameRecordInfo.IntervalMinute;
 
         var config = new ScheduleConfig
         {
@@ -58,7 +63,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         var addRequest = new GameRecordScheduleAddRequest
         {
             GameProviderId = gameProviderId,
-            GameProviderCode = $"{_GameProviderCode}_{gameDataType}",
+            GameProviderCode = $"{_gameRecordInfo.GameProviderCode}_{gameDataType}",
             BrandCode = string.Empty,
             GameProviderAgentId = string.Empty,
             CurrencyCode = string.Empty,

@@ -5,7 +5,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.GameRecord.PragmaticPlayTransferService.ReceiveHandler;
+using Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 using Tgs.MessageQueue.MongoDB.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +40,12 @@ builder.Services
     .AddMemoryCache();
 
 builder.Services
-    .AddPragmaticPlayTransferGameRecordService(
+    .AddGameRecordServiceCore(
+        (options, sp) =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            configuration.GetSection("GameRecordInfo").Bind(options);
+        },
         (options, sp) =>
         {
             var configuration = sp.GetRequiredService<IConfiguration>();
@@ -81,7 +86,7 @@ builder.Services
                    "tgs.gp.gamerecord.pptf",
                    new Dictionary<string, object>());
             };
-        }).AddHandler<PragmaticPlayTransferReceiveHandler>("gp.gamerecord.pptf", false);
+        }).AddHandler<ScheduleMessageHandler>("gp.gamerecord.pptf", false);
     })
     .AddMongoMessageQueue(config =>
     {

@@ -2,7 +2,7 @@
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
-public record GameRoundData
+public record GameRoundMessageRequest
 {
     public string ExternalRoundId { get; init; } = default!;
     public Guid GameProviderId { get; init; }

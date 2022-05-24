@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.GameProviders.Domains;
 using Tgs.GameProviders.QueryServer.Models;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
+using Tgs.MessageQueue;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.UnitTests;
 
@@ -13,8 +16,17 @@ internal class GameRecordHandleServiceUnitTests
     [Test]
     public async Task Normal_Process()
     {
-        var fakeGameProvidersQueryService = Substitute.For<IGameProvidersQueryService>();
-        var fakeGameRecordMessageSender = Substitute.For<IGameRecordMessageSender>();
+        var fakeOptions = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = GameProviderType.PragmaticPlayTransfer,
+            GameProviderConfiguration = GameProviderConfigurations.PragmaticPlayTransfer,
+            IntervalMinuteMax = 10,
+            IntervalMinute = 10
+        });
+
+        var fakeUtensil = Substitute.For<IUtensil>();
+        var fakeMessageSender = Substitute.For<IMessageSender>();
+        var fakeLogger = NullLogger<GameRecordHandleService>.Instance;
 
         var gameRecord = new GameRecordInfo(
             GameProviderType.PragmaticPlayTransfer,
@@ -50,19 +62,16 @@ internal class GameRecordHandleServiceUnitTests
 
         var gameProviderConfigurationId = Guid.NewGuid();
 
-        _ = fakeGameProvidersQueryService.GetGameProviderIdAsync(Arg.Is(gameRecord.GameProviderCode))
-            .Returns(gameRecord.GameProviderId);
-
-        _ = fakeGameProvidersQueryService.GetPlayerAsync(
+        _ = fakeUtensil.GetPlayerAsync(
                 Arg.Is(gameRecord.PlayerCode))
             .Returns(playerInfo);
 
-        _ = fakeGameProvidersQueryService.GetGameIdAsync(
+        _ = fakeUtensil.GetGameIdAsync(
                 Arg.Is(gameRecord.GameProviderId),
                 Arg.Is(gameRecord.ExternalGameId))
             .Returns(2700258);
 
-        _ = fakeGameProvidersQueryService.GetBrandGetGameProviderConfigurationIdAsync(
+        _ = fakeUtensil.GetBrandGetGameProviderConfigurationIdAsync(
                 Arg.Is(playerInfo.BrandId),
                 Arg.Is(gameRecord.GameProviderId))
             .Returns(gameProviderConfigurationId);
@@ -70,21 +79,19 @@ internal class GameRecordHandleServiceUnitTests
         var query = new GameRoundHandleQuery(gameRecord);
 
         var sut = new GameRecordHandleService(
-            fakeGameProvidersQueryService,
-            fakeGameRecordMessageSender);
+            fakeUtensil,
+            fakeMessageSender,
+            fakeOptions,
+            fakeLogger);
 
         var actual = await sut.GetAsync(query);
 
         Assert.True(actual);
 
-        _ = fakeGameRecordMessageSender
+        _ = fakeMessageSender
             .Received(1)
-            .SendGameRoundAsync(
-                Arg.Is<GameRoundData>(x =>
-                    x.GameProviderCode == query.GameRecord.GameProviderCode
-                    && x.GameProviderId == query.GameRecord.GameProviderId
-                    && x.ExternalGameId == query.GameRecord.ExternalGameId
-                    && x.ExternalRoundId == query.GameRecord.ExternalRoundId
-                    && x.PlayerCode == query.GameRecord.PlayerCode));
+            .PublishAsync(
+                Arg.Is("tgs.gp.gamerecord.database.round.pptf"),
+                Arg.Any<ReadOnlyMemory<byte>>());
     }
 }

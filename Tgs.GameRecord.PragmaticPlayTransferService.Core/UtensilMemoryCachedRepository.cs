@@ -1,19 +1,26 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Tgs.GameProviders.QueryServer.Models;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
-internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryService
+internal class UtensilMemoryCachedRepository : IUtensil
 {
+    private readonly TimeSpan _absoluteExpirationRelativeToNow;
+    private readonly GameRecordInfoOptions _gameRecordInfo;
     private readonly IMemoryCache _memoryCache;
-    private readonly IGameProvidersQueryService _queryService;
+    private readonly IUtensil _utensil;
 
-    public GameProvidersQueryMemoryCachedService(
+    public UtensilMemoryCachedRepository(
+        IUtensil utensil,
+        TimeSpan absoluteExpirationRelativeToNow,
         IMemoryCache memoryCache,
-        IGameProvidersQueryService queryService)
+        IOptions<GameRecordInfoOptions> options)
     {
+        _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
+        _absoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow;
         _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-        _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+        _gameRecordInfo = options.Value;
     }
 
     public async ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
@@ -23,13 +30,13 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out Guid? configurationId))
             return configurationId;
 
-        configurationId = await _queryService
+        configurationId = await _utensil
                .GetBrandGetGameProviderConfigurationIdAsync(brandId, gameProviderId)
                .ConfigureAwait(false);
 
         if (configurationId.HasValue)
         {
-            _ = _memoryCache.Set(cacheKey, configurationId, TimeSpan.FromHours(1));
+            _ = _memoryCache.Set(cacheKey, configurationId, _absoluteExpirationRelativeToNow);
         }
 
         return configurationId;
@@ -42,7 +49,7 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out int? gameId))
             return gameId;
 
-        gameId = await _queryService
+        gameId = await _utensil
             .GetGameIdAsync(gameProviderId, gameExternalId)
             .ConfigureAwait(false);
 
@@ -54,14 +61,14 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         return gameId;
     }
 
-    public async ValueTask<Guid?> GetGameProviderIdAsync(string gameProviderCode)
+    public async ValueTask<Guid?> GetGameProviderIdAsync()
     {
-        var cacheKey = gameProviderCode;
+        var cacheKey = _gameRecordInfo.GameProviderCode;
 
         if (_memoryCache.TryGetValue(cacheKey, out Guid? gameProviderId))
             return gameProviderId;
 
-        gameProviderId = await _queryService.GetGameProviderIdAsync(gameProviderCode)
+        gameProviderId = await _utensil.GetGameProviderIdAsync()
                 .ConfigureAwait(false);
 
         if (!gameProviderId.HasValue)
@@ -79,7 +86,7 @@ internal class GameProvidersQueryMemoryCachedService : IGameProvidersQueryServic
         if (_memoryCache.TryGetValue(cacheKey, out PlayerModel? player))
             return player;
 
-        player = await _queryService.GetPlayerAsync(playerCode)
+        player = await _utensil.GetPlayerAsync(playerCode)
             .ConfigureAwait(false);
 
         if (player is not null)

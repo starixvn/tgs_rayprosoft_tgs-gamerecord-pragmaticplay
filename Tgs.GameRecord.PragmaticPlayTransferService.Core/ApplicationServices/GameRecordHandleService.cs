@@ -1,19 +1,31 @@
-﻿using Tgs.GameProviders.QueryServer.Models;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using Tgs.GameProviders.QueryServer.Models;
+using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 
 internal class GameRecordHandleService : IGetService<GameRoundHandleQuery, bool>
 {
-    private readonly IGameRecordMessageSender _messageSender;
-    private readonly IGameProvidersQueryService _queryService;
+    private readonly ILogger<GameRecordHandleService> _logger;
+    private readonly IMessageSender _messageSender;
+    private readonly string _subject;
+    private readonly IUtensil _utensil;
 
     public GameRecordHandleService(
-        IGameProvidersQueryService queryService,
-        IGameRecordMessageSender messageSender)
+        IUtensil utensil,
+        IMessageSender messageSender,
+        IOptions<GameRecordInfoOptions> options,
+        ILogger<GameRecordHandleService> logger)
     {
-        _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+        _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        var gameRecordInfo = options.Value;
+        _subject = $"tgs.gp.gamerecord.database.round.{gameRecordInfo.GameProviderCode.ToLower()}";
     }
 
     public async ValueTask<bool> GetAsync(
@@ -23,8 +35,8 @@ internal class GameRecordHandleService : IGetService<GameRoundHandleQuery, bool>
         var success = true;
 
         var gameProviderId = query.GameRecord.GameProviderId;
-        var playerModel = await _queryService.GetPlayerAsync(query.GameRecord.PlayerCode).ConfigureAwait(false);
-        var gameId = await _queryService.GetGameIdAsync(gameProviderId, query.GameRecord.ExternalGameId).ConfigureAwait(false);
+        var playerModel = await _utensil.GetPlayerAsync(query.GameRecord.PlayerCode).ConfigureAwait(false);
+        var gameId = await _utensil.GetGameIdAsync(gameProviderId, query.GameRecord.ExternalGameId).ConfigureAwait(false);
 
         if (playerModel == null || !gameId.HasValue)
         {
@@ -34,7 +46,7 @@ internal class GameRecordHandleService : IGetService<GameRoundHandleQuery, bool>
         var gameProviderConfigurationId = default(Guid?);
         if (playerModel != null)
         {
-            gameProviderConfigurationId = await _queryService
+            gameProviderConfigurationId = await _utensil
                 .GetBrandGetGameProviderConfigurationIdAsync(playerModel.BrandId, gameProviderId)
                 .ConfigureAwait(false);
 
@@ -45,7 +57,8 @@ internal class GameRecordHandleService : IGetService<GameRoundHandleQuery, bool>
         }
 
         var sysDateTimeOffset = DateTimeOffset.UtcNow;
-        await _messageSender.SendGameRoundAsync(new GameRoundData
+
+        var messageRequest = new GameRoundMessageRequest
         {
             GameProviderCode = query.GameRecord.GameProviderCode,
             GameProviderId = query.GameRecord.GameProviderId,
@@ -73,7 +86,15 @@ internal class GameRecordHandleService : IGetService<GameRoundHandleQuery, bool>
             ClientStatus = query.GameRecord.ClientStatus,
             AdditionalData = query.GameRecord.AdditionalData,
             Success = success
-        }).ConfigureAwait(false);
+        };
+
+        _logger.LogInformation("LogOn:{logOn}  Subject:{subject} MessageRequest:{request}", DateTime.Now.ToString("o"), _subject, messageRequest);
+
+        await _messageSender.PublishAsync(
+                _subject,
+            messageRequest.ToBson(), cancellationToken:
+            cancellationToken)
+            .ConfigureAwait(false);
 
         return success;
     }

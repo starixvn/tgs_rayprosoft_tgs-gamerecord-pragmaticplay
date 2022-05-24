@@ -1,37 +1,38 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Domains;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
+namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
 
-internal class PragmaticPlayTransferJobWorkerCommandService : ICommandService<PragmaticPlayTransferJobWorkerCommand>
+internal class JobWorkerCommandService : ICommandService<JobWorkerCommand>
 {
-    private readonly IGameProvidersQueryService _gameProvidersQueryService;
     private readonly IGetService<GameRecordQuery, GameRecordResult> _gameRecordQueryService;
-    private readonly ILogger<PragmaticPlayTransferJobWorkerCommandService> _logger;
+    private readonly ILogger<JobWorkerCommandService> _logger;
     private readonly IGameRecordScheduleService _scheduleService;
+    private readonly IUtensil _utensil;
 
-    public PragmaticPlayTransferJobWorkerCommandService(
-        IGameProvidersQueryService gameProvidersQueryService,
+    public JobWorkerCommandService(
+        IUtensil utensil,
         IGameRecordScheduleService scheduleService,
         IGetService<GameRecordQuery, GameRecordResult> gameRecordQueryService,
-        ILogger<PragmaticPlayTransferJobWorkerCommandService> logger)
+        ILogger<JobWorkerCommandService> logger)
     {
-        _gameProvidersQueryService = gameProvidersQueryService ?? throw new ArgumentNullException(nameof(gameProvidersQueryService));
+        _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
         _gameRecordQueryService = gameRecordQueryService ?? throw new ArgumentNullException(nameof(gameRecordQueryService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async ValueTask ExecuteAsync(
-        PragmaticPlayTransferJobWorkerCommand command,
+        JobWorkerCommand command,
         CancellationToken cancellationToken = default)
     {
         var gameDataTypes = Enum.GetValues(typeof(PragmaticPlayTransferGameDataType)).Cast<PragmaticPlayTransferGameDataType>();
 
-        var gameProviderId = await _gameProvidersQueryService
-            .GetGameProviderIdAsync(GameProviderType.PragmaticPlayTransfer)
+        var gameProviderId = await _utensil
+            .GetGameProviderIdAsync()
             .ConfigureAwait(false);
 
         if (!gameProviderId.HasValue)

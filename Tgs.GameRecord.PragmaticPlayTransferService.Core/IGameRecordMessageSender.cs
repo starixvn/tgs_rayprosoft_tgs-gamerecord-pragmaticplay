@@ -2,5 +2,5 @@
 
 public interface IGameRecordMessageSender
 {
-    ValueTask SendGameRoundAsync(GameRoundData data);
+    ValueTask SendGameRoundAsync(GameRoundMessageRequest messageRequest);
 }
