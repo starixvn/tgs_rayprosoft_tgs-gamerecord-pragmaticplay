@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using MongoDB.Messaging;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -66,27 +67,41 @@ builder.Services
     .AddMessageQueue()
     .AddRabbitMessageQueue(config =>
     {
-        _ = config.ConfigQueueOptions((options, sp) =>
-        {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            configuration.GetSection("RabbitMQ").Bind(options);
-
-            options.OnSetupQueueAndExchange = channel =>
+        _ = config
+            .ConfigQueueOptions((options, sp) =>
             {
-                _ = channel.QueueDeclare(
-                    "gp.gamerecord.pptf",
-                    true,
-                    false,
-                    false,
-                    new Dictionary<string, object>());
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                configuration.GetSection("RabbitMQ").Bind(options);
 
-                channel.QueueBind(
-                   "gp.gamerecord.pptf",
-                   "amq.direct",
-                   "tgs.gp.gamerecord.pptf",
-                   new Dictionary<string, object>());
-            };
-        }).AddHandler<ScheduleMessageHandler>("gp.gamerecord.pptf", false);
+                options.OnSetupQueueAndExchange = channel =>
+                {
+                    _ = channel.QueueDeclare(
+                        "gp.gamerecord.pptf",
+                        true,
+                        false,
+                        false,
+                        new Dictionary<string, object>());
+
+                    channel.QueueBind(
+                        "gp.gamerecord.pptf",
+                        "amq.direct",
+                        "tgs.gp.gamerecord.pptf",
+                        new Dictionary<string, object>());
+                };
+            })
+            .AddHandler<ScheduleMessageHandler>("gp.gamerecord.pptf", false);
+    })
+    .AddNatsMessageQueue(natsConfig =>
+    {
+        _ = natsConfig
+            .ConfigQueueOptions((options, sp) =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                options.Url = configuration.GetConnectionString("Nats");
+            })
+            .AddProcessor<ManualMessageHandler>(
+                "gp.gamerecord.manual.pptf",
+                "gp.gamerecord.manual");
     })
     .AddMongoMessageQueue(config =>
     {
@@ -144,8 +159,20 @@ builder.Services
     });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFileNames = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.xml");
+    foreach (var xmlFileName in xmlFileNames)
+    {
+        options.IncludeXmlComments(xmlFileName);
+    }
+
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "PragmaticPlayTransfer GameRecord Service",
+        Version = "v1"
+    });
+});
 
 builder.Services.AddHealthChecks();
 
@@ -153,6 +180,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapControllers();
+app.MapProfileViewer();
 
 app.UseSwagger();
 app.UseSwaggerUI();

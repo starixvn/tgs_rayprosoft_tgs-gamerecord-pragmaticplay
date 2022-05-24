@@ -13,7 +13,7 @@ public class PragmaticPlayTransferController : ControllerBase
     /// <summary>
     /// Games the record asynchronous.
     /// </summary>
-    /// <param name="queryService">The service.</param>
+    /// <param name="getService">The service.</param>
     /// <param name="viewModel">The query.</param>
     /// <returns></returns>
     /// <remarks>
@@ -27,10 +27,10 @@ public class PragmaticPlayTransferController : ControllerBase
     /// </remarks>
     [HttpPost]
     public async ValueTask<GameRecordResultViewModel> GameRecordAsync(
-        [FromServices] IGetService<GameRecordQuery, GameRecordResult> queryService,
+        [FromServices] IGetService<GameRecordQuery, GameRecordResult> getService,
         GameRecordQueryViewModel viewModel)
     {
-        var result = await queryService
+        var result = await getService
             .GetAsync(
                 new GameRecordQuery(
                     viewModel.DataType,
