@@ -74,8 +74,8 @@ spec:
             - mountPath: /config/appsettings.json
               name: appsettings
               readOnly: true
-              subPaht: appsettings.json
-            - mountPaht: /etc/ssl/certs/rds-combined-ca-bundle.pem
+              subPath: appsettings.json
+            - mountPath: /etc/ssl/certs/rds-combined-ca-bundle.pem
               name: rds-combined-ca-bundle
               readOnly: true
               subPath: rds-combined-ca-bundle.pem
