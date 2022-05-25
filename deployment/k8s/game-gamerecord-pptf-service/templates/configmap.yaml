@@ -11,5 +11,11 @@ data:
         "GameProvidersBaseUrl": "http://game-gameproviders",
         "GameProvidersQueryServerBaseUrl": "http://game-gameprovider-queryserver",
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
+      },
+      "GameRecordInfo": {
+        "GameProviderCode": "PPTF",
+        "GameProviderConfiguration": "PPTFConfiguration",
+        "IntervalMinuteMax": 10,
+        "IntervalMinute": 10
       }
     }

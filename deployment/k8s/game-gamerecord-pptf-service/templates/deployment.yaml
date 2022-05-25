@@ -40,6 +40,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
+            - name: ConnectionStrings__Nats
+              valueFrom:
+                secretKeyRef:
+                  name: tgs-connections
+                  key: nats
             - name: ConnectionStrings__MongoMessaging
               valueFrom:
                 secretKeyRef:
