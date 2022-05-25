@@ -26,8 +26,6 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
 
         var scheduleConfig = new ScheduleConfig
         {
-            IntervalMinuteMax = 60m,
-            IntervalMinute = 20m,
             LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.Zero),
             StartTime = DateTimeOffset.UtcNow.AddMinutes(-10),
             EndTime = DateTimeOffset.UtcNow,

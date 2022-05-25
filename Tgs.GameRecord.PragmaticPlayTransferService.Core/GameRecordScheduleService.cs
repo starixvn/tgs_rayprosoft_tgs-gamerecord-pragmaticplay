@@ -51,8 +51,6 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
 
         var config = new ScheduleConfig
         {
-            IntervalMinute = intervalMinute,
-            IntervalMinuteMax = intervalMinuteMax,
             LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.Zero),
             StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
             EndTime = sysTime,
@@ -82,16 +80,17 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         DateTimeOffset sysTime,
         CancellationToken cancellationToken)
     {
+        var intervalMinute = _gameRecordInfo.IntervalMinute;
         var config = GetConfig(gameProviderSchedule);
 
-        if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)config.IntervalMinute * 60)
+        if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)intervalMinute * 60)
         {
-            config.StartTime = sysTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
+            config.StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1);
             config.EndTime = sysTime;
         }
         else
         {
-            var endTime = config.EndTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
+            var endTime = config.EndTime.AddSeconds((double)intervalMinute * 60 * -1);
             if (endTime > nextTime)
                 endTime = nextTime;
 
