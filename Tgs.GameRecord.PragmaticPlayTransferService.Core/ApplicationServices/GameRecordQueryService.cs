@@ -1,5 +1,4 @@
 ﻿using Tgs.GameProviders.Client;
-using Tgs.GameProviders.QueryServer.Models;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
@@ -56,8 +55,8 @@ internal class GameRecordQueryService : IGetService<GameRecordQuery, GameRecordR
                             data.GameProviderCode,
                             data.GameProviderId,
                             data.PlayerCode,
-                            (RoundStatus)data.Status,
-                            (RoundClientStatus)data.ClientStatus,
+                            data.Status,
+                            data.ClientStatus,
                             data.ExternalRoundId,
                             data.ExternalGameId,
                             data.ExternalCreatedOn,

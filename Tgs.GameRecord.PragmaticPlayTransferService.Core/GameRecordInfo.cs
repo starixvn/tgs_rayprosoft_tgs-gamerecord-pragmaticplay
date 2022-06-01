@@ -1,4 +1,4 @@
-﻿using Tgs.GameProviders.QueryServer.Models;
+﻿using Tgs.GameProviders.Client;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
@@ -6,8 +6,8 @@ public record GameRecordInfo(
     string GameProviderCode,
     Guid GameProviderId,
     string PlayerCode,
-    RoundStatus Status,
-    RoundClientStatus ClientStatus,
+    GameRecordRoundStatus Status,
+    GameRecordRoundClientStatus ClientStatus,
     string ExternalRoundId,
     string ExternalGameId,
     DateTimeOffset? ExternalCreatedOn,

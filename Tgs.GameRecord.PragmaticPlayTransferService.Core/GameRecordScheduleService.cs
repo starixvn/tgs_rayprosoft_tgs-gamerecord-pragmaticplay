@@ -46,13 +46,11 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         CancellationToken cancellationToken)
     {
         var sysTime = _systemClock.CurrentTime;
-        var intervalMinuteMax = _gameRecordInfo.IntervalMinuteMax;
-        var intervalMinute = _gameRecordInfo.IntervalMinute;
 
         var config = new ScheduleConfig
         {
             LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.Zero),
-            StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
+            StartTime = sysTime.AddSeconds((double)_gameRecordInfo.IntervalMinute * 60 * -1),
             EndTime = sysTime,
             NextTime = sysTime,
             DataType = gameDataType

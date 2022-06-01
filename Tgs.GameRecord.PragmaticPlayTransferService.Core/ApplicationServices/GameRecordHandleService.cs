@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
-using Tgs.GameProviders.QueryServer.Models;
+using Tgs.GameProviders.Client;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
@@ -71,7 +71,7 @@ internal class GameRecordHandleService : IGetService<GameRoundHandleQuery, bool>
             GameProviderConfigurationId = gameProviderConfigurationId ?? Guid.Empty,
             WalletId = playerModel?.DefaultWalletId ?? Guid.Empty,
             CreatedOn = sysDateTimeOffset,
-            ClosedOn = query.GameRecord.Status == RoundStatus.Closed ? sysDateTimeOffset : null,
+            ClosedOn = query.GameRecord.Status == GameRecordRoundStatus.Closed ? sysDateTimeOffset : null,
             UpdatedOn = sysDateTimeOffset,
             BrandId = playerModel?.BrandId ?? Guid.Empty,
             ExternalCreatedOn = query.GameRecord.ExternalCreatedOn,
