@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Domains;
 using Tgs.GameProviders.QueryServer.Models;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
@@ -32,8 +33,8 @@ internal class GameRecordHandleServiceUnitTests
             GameProviderType.PragmaticPlayTransfer,
             Guid.Parse("e4ecfa98-b373-4123-87e0-cb9e883d0691"),
             "4ucmqplxb029",
-            RoundStatus.Closed,
-            RoundClientStatus.Win,
+            GameRecordRoundStatus.Closed,
+            GameRecordRoundClientStatus.Win,
             "38660",
             "vpmr9",
             DateTimeOffset.UtcNow.AddSeconds(-5),

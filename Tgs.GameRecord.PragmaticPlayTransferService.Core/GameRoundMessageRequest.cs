@@ -1,4 +1,4 @@
-﻿using Tgs.GameProviders.QueryServer.Models;
+﻿using Tgs.GameProviders.Client;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
@@ -11,7 +11,7 @@ public record GameRoundMessageRequest
     public int GameId { get; init; }
     public string ExternalGameId { get; init; } = default!;
     public string CurrencyCode { get; init; } = default!;
-    public RoundStatus Status { get; init; }
+    public GameRecordRoundStatus Status { get; init; }
     public Guid GameProviderConfigurationId { get; init; }
     public Guid WalletId { get; init; }
     public DateTimeOffset CreatedOn { get; init; }
@@ -28,6 +28,6 @@ public record GameRoundMessageRequest
     public decimal? PlayerWinLoss { get; init; }
     public decimal? TieBetAdjustment { get; init; }
     public string AdditionalData { get; init; } = default!;
-    public RoundClientStatus ClientStatus { get; init; }
+    public GameRecordRoundClientStatus ClientStatus { get; init; }
     public bool Success { get; init; }
 }
