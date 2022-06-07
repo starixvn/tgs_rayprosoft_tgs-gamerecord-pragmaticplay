@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
@@ -21,15 +22,18 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
         var fakeGameRecordScheduleService = Substitute.For<IGameRecordScheduleService>();
         var fakeGameProvidersQueryService = Substitute.For<IUtensil>();
         var fakeGameRecordQueryService = Substitute.For<IGetService<GameRecordQuery, GameRecordResult>>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+
+        var currentTime = DateTimeOffset.UtcNow;
 
         var gameProviderId = Guid.Parse("e4ecfa98-b373-4123-87e0-cb9e883d0691");
 
         var scheduleConfig = new ScheduleConfig
         {
             LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.Zero),
-            StartTime = DateTimeOffset.UtcNow.AddMinutes(-10),
-            EndTime = DateTimeOffset.UtcNow,
-            NextTime = DateTimeOffset.UtcNow
+            StartTime = currentTime.AddMinutes(-10),
+            EndTime = currentTime.AddMinutes(-1),
+            NextTime = currentTime.AddMinutes(-1)
         };
 
         var dataType = PragmaticPlayTransferGameDataType.RNG;
@@ -41,7 +45,10 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             CurrencyCode = string.Empty,
             GameProviderId = gameProviderId,
             GameProviderCode = $"{GameProviderType.PragmaticPlayTransfer}_{dataType}",
-            Config = JsonSerializer.Serialize(scheduleConfig)
+            Config = JsonSerializer.Serialize(scheduleConfig),
+            Status = GameRecordScheduleStatus.Enable,
+            CreatedOn = currentTime.ToTimestamp(),
+            UpdatedOn = currentTime.ToTimestamp()
         };
 
         var gameRecordResult = new GameRecordResult(
@@ -49,12 +56,14 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             10,
             10,
             0,
-            DateTimeOffset.UtcNow.AddMinutes(8),
-            DateTimeOffset.UtcNow.AddMinutes(10));
+            currentTime.AddMinutes(8),
+            currentTime.AddMinutes(10));
 
         var gameRecordQuery = new GameRecordQuery(
             dataType,
             scheduleConfig.StartTime);
+
+        _ = fakeSystemClock.CurrentTime.Returns(currentTime);
 
         _ = fakeGameProvidersQueryService.GetGameProviderIdAsync()
          .Returns(gameProviderId);
@@ -74,6 +83,7 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             fakeGameProvidersQueryService,
             fakeGameRecordScheduleService,
             fakeGameRecordQueryService,
+            fakeSystemClock,
             NullLogger<JobWorkerCommandService>.Instance);
 
         await sut.ExecuteAsync(new JobWorkerCommand()).ConfigureAwait(false);
