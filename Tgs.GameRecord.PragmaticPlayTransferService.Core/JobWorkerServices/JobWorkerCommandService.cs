@@ -11,17 +11,20 @@ internal class JobWorkerCommandService : ICommandService<JobWorkerCommand>
     private readonly IGetService<GameRecordQuery, GameRecordResult> _gameRecordQueryService;
     private readonly ILogger<JobWorkerCommandService> _logger;
     private readonly IGameRecordScheduleService _scheduleService;
+    private readonly ISystemClock _systemClock;
     private readonly IUtensil _utensil;
 
     public JobWorkerCommandService(
         IUtensil utensil,
         IGameRecordScheduleService scheduleService,
         IGetService<GameRecordQuery, GameRecordResult> gameRecordQueryService,
+        ISystemClock systemClock,
         ILogger<JobWorkerCommandService> logger)
     {
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
         _gameRecordQueryService = gameRecordQueryService ?? throw new ArgumentNullException(nameof(gameRecordQueryService));
+        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -52,7 +55,7 @@ internal class JobWorkerCommandService : ICommandService<JobWorkerCommand>
                                    .InitAsync(gameProviderId.Value, gameDataType, cancellationToken)
                                    .ConfigureAwait(false);
 
-                var sysTime = DateTimeOffset.UtcNow;
+                var sysTime = _systemClock.CurrentTime;
 
                 while (schedule != null)
                 {

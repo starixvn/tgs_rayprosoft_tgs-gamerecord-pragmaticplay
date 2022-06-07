@@ -88,7 +88,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         }
         else
         {
-            var endTime = config.EndTime.AddSeconds((double)intervalMinute * 60 * -1);
+            var endTime = config.EndTime.AddSeconds((double)intervalMinute * 60);
             if (endTime > nextTime)
                 endTime = nextTime;
 
