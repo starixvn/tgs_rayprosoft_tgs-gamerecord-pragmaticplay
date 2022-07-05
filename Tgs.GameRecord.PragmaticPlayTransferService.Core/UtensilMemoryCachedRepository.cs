@@ -12,15 +12,14 @@ internal class UtensilMemoryCachedRepository : IUtensil
     private readonly IUtensil _utensil;
 
     public UtensilMemoryCachedRepository(
+        IOptions<GameRecordInfoOptions> options,
         IUtensil utensil,
-        TimeSpan absoluteExpirationRelativeToNow,
-        IMemoryCache memoryCache,
-        IOptions<GameRecordInfoOptions> options)
+        IMemoryCache memoryCache)
     {
+        _absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
-        _absoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow;
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
         _gameRecordInfo = options.Value;
+        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
     }
 
     public async ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
@@ -55,7 +54,7 @@ internal class UtensilMemoryCachedRepository : IUtensil
 
         if (gameId.HasValue)
         {
-            _ = _memoryCache.Set(cacheKey, gameId, TimeSpan.FromHours(1));
+            _ = _memoryCache.Set(cacheKey, gameId, _absoluteExpirationRelativeToNow);
         }
 
         return gameId;
@@ -73,7 +72,7 @@ internal class UtensilMemoryCachedRepository : IUtensil
 
         if (!gameProviderId.HasValue)
         {
-            _ = _memoryCache.Set(cacheKey, gameProviderId, TimeSpan.FromDays(1));
+            _ = _memoryCache.Set(cacheKey, gameProviderId, _absoluteExpirationRelativeToNow);
         }
 
         return gameProviderId;
@@ -91,7 +90,7 @@ internal class UtensilMemoryCachedRepository : IUtensil
 
         if (player is not null)
         {
-            _ = _memoryCache.Set(cacheKey, player, TimeSpan.FromDays(1));
+            _ = _memoryCache.Set(cacheKey, player, _absoluteExpirationRelativeToNow);
         }
 
         return player;

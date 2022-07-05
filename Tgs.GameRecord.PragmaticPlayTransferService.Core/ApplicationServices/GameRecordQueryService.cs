@@ -27,8 +27,9 @@ internal class GameRecordQueryService : IGetService<GameRecordQuery, GameRecordR
         var nextTime = default(DateTimeOffset?);
 
         var response = await _gameRecordListClient.PragmaticPlayTransferGameRecordListAsync(
-            query.DataType,
-            query.StartTime).ConfigureAwait(false);
+            dataType: query.DataType,
+            startTime: query.StartTime,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (response == null || !response.Success)
         {
