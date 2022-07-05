@@ -30,6 +30,5 @@ public static class ServiceCollectionExtensions
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
             .AddTransient<IUtensil, UtensilRepository>()
             .Decorate<IUtensil>((inner, sp) =>
-                ActivatorUtilities.CreateInstance<UtensilMemoryCachedRepository>(sp,
-                    inner, TimeSpan.FromHours(1)));
+                ActivatorUtilities.CreateInstance<UtensilMemoryCachedRepository>(sp, inner));
 }
