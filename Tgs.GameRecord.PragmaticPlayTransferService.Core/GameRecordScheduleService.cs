@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Tgs.GameProviders.Client;
 using Tgs.GameRecordSchedules.Client;
@@ -45,7 +46,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         PragmaticPlayTransferGameDataType gameDataType,
         CancellationToken cancellationToken)
     {
-        var sysTime = _systemClock.CurrentTime;
+        var sysTime = _systemClock.UtcNow;
 
         var config = new ScheduleConfig
         {

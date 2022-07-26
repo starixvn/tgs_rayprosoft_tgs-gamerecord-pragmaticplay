@@ -1,6 +1,8 @@
 ﻿// ReSharper disable CheckNamespace
 
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using StackExchange.Redis;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.QueryServer.Client;
@@ -28,7 +30,7 @@ public static class ServiceCollectionExtensions
             .AddGameProvidersClient(gameProvidersClientOptions)
             .AddGameProvidersQueryServerClient(gameProvidersQueryServerClientOptions)
             .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
-            .AddScoped<ISystemClock, SystemClock>()
+            .AddSingleton<ISystemClock, SystemClock>()
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
             .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, redisDatabaseResolver(sp)))
             .AddTransient<IUtensil, UtensilRepository>()
