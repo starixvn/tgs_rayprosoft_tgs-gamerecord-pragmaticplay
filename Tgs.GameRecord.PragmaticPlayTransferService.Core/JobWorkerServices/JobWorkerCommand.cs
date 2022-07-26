@@ -1,3 +1,4 @@
 ﻿namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
 
-public record JobWorkerCommand;
+public record JobWorkerCommand(
+    string GameDataType);

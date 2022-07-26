@@ -1,6 +1,7 @@
 ﻿// ReSharper disable CheckNamespace
 
 using System.Reflection;
+using StackExchange.Redis;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.QueryServer.Client;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core;
@@ -15,7 +16,8 @@ public static class ServiceCollectionExtensions
         Action<GameRecordInfoOptions, IServiceProvider> configure,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
         Action<GameProvidersQueryServerClientOptions, IServiceProvider> gameProvidersQueryServerClientOptions,
-        Action<GameRecordSchedulesClientOptions, IServiceProvider> gameRecordSchedulesClientOptions)
+        Action<GameRecordSchedulesClientOptions, IServiceProvider> gameRecordSchedulesClientOptions,
+        Func<IServiceProvider, IDatabase> redisDatabaseResolver)
         => services
             .AddOptions<GameRecordInfoOptions>()
             .Configure(configure)
@@ -28,6 +30,7 @@ public static class ServiceCollectionExtensions
             .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
             .AddScoped<ISystemClock, SystemClock>()
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
+            .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, redisDatabaseResolver(sp)))
             .AddTransient<IUtensil, UtensilRepository>()
             .Decorate<IUtensil>((inner, sp) =>
                 ActivatorUtilities.CreateInstance<UtensilMemoryCachedRepository>(sp, inner));
