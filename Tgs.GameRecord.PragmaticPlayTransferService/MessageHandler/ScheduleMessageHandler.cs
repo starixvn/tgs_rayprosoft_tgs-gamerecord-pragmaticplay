@@ -38,6 +38,7 @@ public class ScheduleMessageHandler : IMessageHandler
 
         _logger.LogInformation("Information Received:{LogInfo}", logInfo);
 
-        return _commandService.ExecuteAsync(new JobWorkerCommand(), cancellationToken);
+        return _commandService.ExecuteAsync(new JobWorkerCommand(
+            command.GameDataType), cancellationToken);
     }
 }

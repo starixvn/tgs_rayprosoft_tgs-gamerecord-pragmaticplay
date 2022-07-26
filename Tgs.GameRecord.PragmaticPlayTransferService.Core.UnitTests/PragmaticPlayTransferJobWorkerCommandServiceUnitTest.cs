@@ -23,6 +23,7 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
         var fakeGameProvidersQueryService = Substitute.For<IUtensil>();
         var fakeGameRecordQueryService = Substitute.For<IGetService<GameRecordQuery, GameRecordResult>>();
         var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeScheduleDispatch = Substitute.For<IScheduleDispatch>();
 
         var currentTime = DateTimeOffset.UtcNow;
 
@@ -63,10 +64,18 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             dataType,
             scheduleConfig.StartTime);
 
+        var command = new JobWorkerCommand("RNG");
+
         _ = fakeSystemClock.CurrentTime.Returns(currentTime);
 
         _ = fakeGameProvidersQueryService.GetGameProviderIdAsync()
-         .Returns(gameProviderId);
+            .Returns(gameProviderId);
+
+        _ = fakeScheduleDispatch.ExistAsync(Arg.Any<string>())
+            .Returns(false);
+
+        _ = fakeScheduleDispatch.LockingAsync(Arg.Any<string>(), command)
+            .Returns(true);
 
         _ = fakeGameRecordScheduleService
             .GetAsync(
@@ -84,9 +93,10 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             fakeGameRecordScheduleService,
             fakeGameRecordQueryService,
             fakeSystemClock,
-            NullLogger<JobWorkerCommandService>.Instance);
+            NullLogger<JobWorkerCommandService>.Instance,
+            fakeScheduleDispatch);
 
-        await sut.ExecuteAsync(new JobWorkerCommand()).ConfigureAwait(false);
+        await sut.ExecuteAsync(new JobWorkerCommand("RNG")).ConfigureAwait(false);
 
         _ = fakeGameRecordScheduleService
             .Received(1)
@@ -99,5 +109,9 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
         _ = fakeGameRecordQueryService
             .Received(1)
             .GetAsync(Arg.Is(gameRecordQuery));
+
+        _ = fakeScheduleDispatch
+            .Received(1)
+            .UnlockAsync(Arg.Any<string>());
     }
 }
