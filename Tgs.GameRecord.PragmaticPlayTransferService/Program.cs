@@ -6,6 +6,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.GameRecord.PragmaticPlayTransferService;
 using Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 using Tgs.MessageQueue.MongoDB.Configuration;
 
@@ -41,6 +42,13 @@ builder.Services
     .AddMemoryCache();
 
 builder.Services
+    .AddGameRecordAwcService((options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.ConnectionString = configuration.GetConnectionString("Redis");
+    });
+
+builder.Services
     .AddGameRecordServiceCore(
         (options, sp) =>
         {
@@ -61,36 +69,11 @@ builder.Services
         {
             var configuration = sp.GetRequiredService<IConfiguration>();
             options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRecordSchedulesBaseUrl");
-        });
+        },
+        (sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
 
 builder.Services
     .AddMessageQueue()
-    .AddRabbitMessageQueue(config =>
-    {
-        _ = config
-            .ConfigQueueOptions((options, sp) =>
-            {
-                var configuration = sp.GetRequiredService<IConfiguration>();
-                configuration.GetSection("RabbitMQ").Bind(options);
-
-                options.OnSetupQueueAndExchange = channel =>
-                {
-                    _ = channel.QueueDeclare(
-                        "gp.gamerecord.pptf",
-                        true,
-                        false,
-                        false,
-                        new Dictionary<string, object>());
-
-                    channel.QueueBind(
-                        "gp.gamerecord.pptf",
-                        "amq.direct",
-                        "tgs.gp.gamerecord.pptf",
-                        new Dictionary<string, object>());
-                };
-            })
-            .AddHandler<ScheduleMessageHandler>("gp.gamerecord.pptf", false);
-    })
     .AddNatsMessageQueue(natsConfig =>
     {
         _ = natsConfig
@@ -99,6 +82,9 @@ builder.Services
                 var configuration = sp.GetRequiredService<IConfiguration>();
                 options.Url = configuration.GetConnectionString("Nats");
             })
+            .AddHandler<ScheduleMessageHandler>(
+            "gp.gamerecord.schedule.pptf",
+            "gp.gamerecord.schedule")
             .AddProcessor<ManualMessageHandler>(
                 "gp.gamerecord.manual.pptf",
                 "gp.gamerecord.manual");
@@ -113,8 +99,7 @@ builder.Services
                     ConnectionString =
                         sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging"),
                     MessageQueue = MessageQueue.Default
-                })
-            .DeclareQueue("tgs.gp.gamerecord.database.round.pptf");
+                });
     })
     .ClearAllExchanges()
     .AddMongoGlobPatternExchange(

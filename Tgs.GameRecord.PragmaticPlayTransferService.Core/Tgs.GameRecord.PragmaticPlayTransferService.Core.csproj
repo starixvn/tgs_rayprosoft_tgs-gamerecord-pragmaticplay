@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.16.1" />
     <PackageReference Include="Scrutor" Version="4.2.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
     <PackageReference Include="TGS.GameProviders.Client" Version="0.0.41" />
     <PackageReference Include="Tgs.GameProviders.QueryServer.Client" Version="0.0.13" />
     <PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.5" />
