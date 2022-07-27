@@ -8,6 +8,6 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
 
         public Task<bool> LockingAsync(string key, JobWorkerCommand command);
 
-        public Task<bool> UnlockAsync(string key);
+        public Task UnlockAsync(string key);
     }
 }

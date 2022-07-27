@@ -16,6 +16,7 @@ data:
         "GameProviderCode": "PPTF",
         "GameProviderConfiguration": "PPTFConfiguration",
         "IntervalMinuteMax": 10,
-        "IntervalMinute": 5
+        "IntervalMinute": 5,
+        "LockSeconds":210
       }
     }

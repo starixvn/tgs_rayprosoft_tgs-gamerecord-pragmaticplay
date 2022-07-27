@@ -73,7 +73,7 @@ internal class JobWorkerCommandService : ICommandService<JobWorkerCommand>
                 }
                 finally
                 {
-                    _ = await _scheduleDispatch.UnlockAsync(key: key).ConfigureAwait(false);
+                    await _scheduleDispatch.UnlockAsync(key: key).ConfigureAwait(false);
                 }
             }
         }

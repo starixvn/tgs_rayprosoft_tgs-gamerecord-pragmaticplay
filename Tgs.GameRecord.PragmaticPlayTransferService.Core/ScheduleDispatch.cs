@@ -17,7 +17,7 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
         {
             _gameRecordInfoOptions = options.Value;
             _database = database ?? throw new ArgumentNullException(nameof(database));
-            _expiry = TimeSpan.FromMinutes((int)_gameRecordInfoOptions.IntervalMinute);
+            _expiry = TimeSpan.FromSeconds(_gameRecordInfoOptions.LockSeconds);
         }
 
         public Task<bool> ExistAsync(string key)
@@ -26,7 +26,13 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
         public Task<bool> LockingAsync(string key, JobWorkerCommand command)
             => _database.StringSetAsync(key: key, value: JsonSerializer.Serialize(command), expiry: _expiry, when: When.NotExists);
 
-        public Task<bool> UnlockAsync(string key)
-            => _database.KeyDeleteAsync(key: key);
+        public async Task UnlockAsync(string key)
+        {
+            _ = await _database
+                    .KeyDeleteAsync(
+                        key: key,
+                        flags: CommandFlags.FireAndForget)
+                    .ConfigureAwait(false);
+        }
     }
 }
