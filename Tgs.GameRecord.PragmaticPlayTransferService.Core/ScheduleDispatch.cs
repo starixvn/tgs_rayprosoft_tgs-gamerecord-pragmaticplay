@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
 {
@@ -17,22 +17,22 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
         {
             _gameRecordInfoOptions = options.Value;
             _database = database ?? throw new ArgumentNullException(nameof(database));
-            _expiry = TimeSpan.FromSeconds(_gameRecordInfoOptions.LockSeconds);
+            _expiry = TimeSpan.FromMinutes(_gameRecordInfoOptions.LockMinute);
         }
 
         public Task<bool> ExistAsync(string key)
             => _database.KeyExistsAsync(key: key);
 
-        public Task<bool> LockingAsync(string key, JobWorkerCommand command)
+        public Task<bool> LockingAsync(string key, ScheduleDispatchCommand command)
             => _database.StringSetAsync(key: key, value: JsonSerializer.Serialize(command), expiry: _expiry, when: When.NotExists);
 
         public async Task UnlockAsync(string key)
         {
             _ = await _database
-                    .KeyDeleteAsync(
-                        key: key,
-                        flags: CommandFlags.FireAndForget)
-                    .ConfigureAwait(false);
+                .KeyDeleteAsync(
+                    key: key,
+                    flags: CommandFlags.FireAndForget)
+                .ConfigureAwait(false);
         }
     }
 }

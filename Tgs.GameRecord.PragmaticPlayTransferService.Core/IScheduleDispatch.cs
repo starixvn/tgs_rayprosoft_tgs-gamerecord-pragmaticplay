@@ -1,4 +1,4 @@
-﻿using Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
+﻿using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
 {
@@ -6,7 +6,7 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core
     {
         public Task<bool> ExistAsync(string key);
 
-        public Task<bool> LockingAsync(string key, JobWorkerCommand command);
+        public Task<bool> LockingAsync(string key, ScheduleDispatchCommand command);
 
         public Task UnlockAsync(string key);
     }
