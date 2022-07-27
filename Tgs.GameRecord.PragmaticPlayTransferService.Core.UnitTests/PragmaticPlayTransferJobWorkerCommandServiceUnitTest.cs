@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -26,17 +27,21 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
         });
         var fakeLogger = NullLogger<JobWorkerCommandService>.Instance;
         var fakeGameRecordQueryService = Substitute.For<IGetService<GameRecordQuery, GameRecordResult>>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
 
-        var endTime = DateTimeOffset.UtcNow;
+        var currentTime = DateTimeOffset.UtcNow;
 
-        var startTime = endTime.AddMinutes(gameRecordInfoOptions.Value.IntervalMinute * -1);
+
+        var startTime = currentTime.AddMinutes(gameRecordInfoOptions.Value.IntervalMinute * -1);
 
         var query = new JobWorkerQuery(
             Guid.Parse("e4ecfa98-b373-4123-87e0-cb9e883d0691"),
             gameRecordInfoOptions.Value.GameProviderCode,
             PragmaticPlayTransferGameDataType.RNG,
             StartTime: startTime,
-            EndTime: endTime);
+            EndTime: currentTime);
+
+        _ = fakeSystemClock.UtcNow.Returns(currentTime);
 
         var gameRecordResult = new GameRecordResult(
             true,
@@ -50,12 +55,14 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
             query.GameDataType,
             query.StartTime);
 
+
         _ = fakeGameRecordQueryService.GetAsync(Arg.Is(gameRecordQuery))
             .Returns(gameRecordResult);
 
         var sut = new JobWorkerCommandService(
             fakeLogger,
-            fakeGameRecordQueryService);
+            fakeGameRecordQueryService,
+            fakeSystemClock);
 
         var actual = await sut.GetAsync(query).ConfigureAwait(false);
 
