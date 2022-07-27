@@ -30,7 +30,7 @@ internal class JobWorkerCommandService : IGetService<JobWorkerQuery, JobWorkerRe
         var currentTime = _systemClock.UtcNow;
         try
         {
-            while (nextTime < query.EndTime && nextTime < currentTime)
+            while (nextTime < query.EndTime && nextTime < currentTime && currentTime.Subtract(nextTime).TotalSeconds > 30)
             {
                 var result = await _gameRecordQueryService
                     .GetAsync(new GameRecordQuery(query.GameDataType, nextTime), cancellationToken)
