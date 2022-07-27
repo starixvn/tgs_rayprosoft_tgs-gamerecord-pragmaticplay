@@ -39,7 +39,7 @@ internal class JobWorkerCommandService : IGetService<JobWorkerQuery, JobWorkerRe
                 if (result.Success && result.NextTime != null)
                 {
                     nextTime = result.NextTime.Value;
-                    lastGameRecordTime = result.LastGameRecordTime;
+                    lastGameRecordTime = result.LastGameRecordTime ?? lastGameRecordTime;
                 }
                 else
                 {
