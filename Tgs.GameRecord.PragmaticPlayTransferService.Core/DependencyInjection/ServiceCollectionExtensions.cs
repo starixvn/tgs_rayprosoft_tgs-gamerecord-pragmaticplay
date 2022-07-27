@@ -2,7 +2,6 @@
 
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using StackExchange.Redis;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.QueryServer.Client;
