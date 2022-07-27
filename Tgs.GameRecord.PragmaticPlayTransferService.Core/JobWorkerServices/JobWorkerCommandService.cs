@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -7,13 +8,16 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
 internal class JobWorkerCommandService : IGetService<JobWorkerQuery, JobWorkerResult>
 {
     private readonly IGetService<GameRecordQuery, GameRecordResult> _gameRecordQueryService;
+    private readonly ISystemClock _systemClock;
     private readonly ILogger<JobWorkerCommandService> _logger;
 
     public JobWorkerCommandService(
         ILogger<JobWorkerCommandService> logger,
-        IGetService<GameRecordQuery, GameRecordResult> gameRecordQueryService)
+        IGetService<GameRecordQuery, GameRecordResult> gameRecordQueryService,
+        ISystemClock systemClock)
     {
         _gameRecordQueryService = gameRecordQueryService ?? throw new ArgumentNullException(nameof(gameRecordQueryService));
+        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -23,9 +27,10 @@ internal class JobWorkerCommandService : IGetService<JobWorkerQuery, JobWorkerRe
     {
         DateTimeOffset? lastGameRecordTime = null;
         var nextTime = query.StartTime;
+        var currentTime = _systemClock.UtcNow;
         try
         {
-            while (nextTime < query.EndTime)
+            while (nextTime < query.EndTime && nextTime < currentTime)
             {
                 var result = await _gameRecordQueryService
                     .GetAsync(new GameRecordQuery(query.GameDataType, nextTime), cancellationToken)
