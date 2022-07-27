@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
-using Tgs.GameRecord.PragmaticPlayTransferService.Core;
-using Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
@@ -8,12 +7,11 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 
 public class ManualMessageHandler : IMessageProcessor
 {
-    private readonly IGetService<GameRecordQuery, GameRecordResult> _getService;
+    private readonly IGetService<ManualDispatchQuery, ManualDispatchResult> _service;
 
-    public ManualMessageHandler(
-        IGetService<GameRecordQuery, GameRecordResult> getService)
+    public ManualMessageHandler(IGetService<ManualDispatchQuery, ManualDispatchResult> service)
     {
-        _getService = getService ?? throw new ArgumentNullException(nameof(getService));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(
@@ -22,19 +20,20 @@ public class ManualMessageHandler : IMessageProcessor
     {
         var request = JsonSerializer.Deserialize<ManualMessageRequest>(data.Span)!;
 
-        var result = await _getService.GetAsync(
-            new GameRecordQuery(
-                request.DataType,
-                request.StartTime),
-            cancellationToken).ConfigureAwait(false);
+        var query = new ManualDispatchQuery(
+            GameDataType: request.GameDataType,
+            StartTime: request.StartTime,
+            EndTime: request.EndTime);
+
+        var result = await _service.GetAsync(
+            query: query,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
         var response = new ManualMessageResponse(
-            result.Success,
-            result.Count,
-            result.SuccessCount,
-            result.FailureCount,
-            result.LastGameRecordTime,
-            result.NextTime);
+            Success: result.Success,
+            Message: result.Message,
+            NextTime: result.NextTime,
+            LastGameRecordTime: result.LastGameRecordTime);
 
         return JsonSerializer.SerializeToUtf8Bytes(response);
     }

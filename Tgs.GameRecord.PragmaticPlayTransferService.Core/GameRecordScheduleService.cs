@@ -10,6 +10,7 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 internal class GameRecordScheduleService : IGameRecordScheduleService
 {
     private readonly GameRecordInfoOptions _gameRecordInfo;
+    private readonly double _intervalMinute;
     private readonly IGameRecordSchedulesGrpc _scheduleClient;
     private readonly ISystemClock _systemClock;
 
@@ -21,48 +22,49 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         _scheduleClient = scheduleClient ?? throw new ArgumentNullException(nameof(scheduleClient));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _gameRecordInfo = options.Value;
+        _intervalMinute = (_gameRecordInfo.IntervalMinute > _gameRecordInfo.MaxIntervalMinute)
+            ? _gameRecordInfo.MaxIntervalMinute :
+            _gameRecordInfo.IntervalMinute;
     }
 
     public ValueTask<GameRecordScheduleReply?> GetAsync(
         PragmaticPlayTransferGameDataType gameDataType,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var request = new GameRecordScheduleGetRequest
         {
-            GameProviderCode = $"{_gameRecordInfo.GameProviderCode}_{gameDataType}",
+            GameProviderCode = _gameRecordInfo.GameProviderCode,
             BrandCode = string.Empty,
-            GameProviderAgentId = string.Empty,
+            GameProviderAgentId = gameDataType.ToString(),
             CurrencyCode = string.Empty
         };
 
         return _scheduleClient.GameRecordScheduleGetAsync(request, cancellationToken);
     }
 
-    public ScheduleConfig GetConfig(GameRecordScheduleReply gameProviderSchedule)
-        => JsonSerializer.Deserialize<ScheduleConfig>(gameProviderSchedule.Config)!;
+    public ScheduleConfig GetConfig(GameRecordScheduleReply gameRecordSchedule)
+        => JsonSerializer.Deserialize<ScheduleConfig>(gameRecordSchedule.Config)!;
 
     public async ValueTask<GameRecordScheduleReply?> InitAsync(
         Guid gameProviderId,
         PragmaticPlayTransferGameDataType gameDataType,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        var sysTime = _systemClock.UtcNow;
+        var endDate = DateTimeOffset.ParseExact(_systemClock.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+        var nextTime = endDate.AddMinutes(_intervalMinute * -1);
 
         var config = new ScheduleConfig
         {
             LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.Zero),
-            StartTime = sysTime.AddSeconds((double)_gameRecordInfo.IntervalMinute * 60 * -1),
-            EndTime = sysTime,
-            NextTime = sysTime,
-            DataType = gameDataType
+            NextTime = nextTime
         };
 
         var addRequest = new GameRecordScheduleAddRequest
         {
             GameProviderId = gameProviderId,
-            GameProviderCode = $"{_gameRecordInfo.GameProviderCode}_{gameDataType}",
+            GameProviderCode = _gameRecordInfo.GameProviderCode,
             BrandCode = string.Empty,
-            GameProviderAgentId = string.Empty,
+            GameProviderAgentId = gameDataType.ToString(),
             CurrencyCode = string.Empty,
             Config = JsonSerializer.Serialize(config)
         };
@@ -73,38 +75,22 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
     }
 
     public async ValueTask<GameRecordScheduleReply?> UpdateAsync(
-        GameRecordScheduleReply gameProviderSchedule,
-        DateTimeOffset? lastGameRecordTime,
+        GameRecordScheduleReply gameRecordSchedule,
+        PragmaticPlayTransferGameDataType gameDataType,
         DateTimeOffset nextTime,
-        DateTimeOffset sysTime,
-        CancellationToken cancellationToken)
+        DateTimeOffset? lastGameRecordTime = null,
+        CancellationToken cancellationToken = default)
     {
-        var intervalMinute = _gameRecordInfo.IntervalMinute;
-        var config = GetConfig(gameProviderSchedule);
-
-        if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)intervalMinute * 60)
-        {
-            config.StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1);
-            config.EndTime = sysTime;
-        }
-        else
-        {
-            var endTime = config.EndTime.AddSeconds((double)intervalMinute * 60);
-            if (endTime > nextTime)
-                endTime = nextTime;
-
-            config.StartTime = config.EndTime;
-            config.EndTime = endTime > sysTime ? sysTime : endTime;
-        }
+        var config = GetConfig(gameRecordSchedule);
 
         config.LastGameRecordTime = lastGameRecordTime ?? config.LastGameRecordTime;
         config.NextTime = nextTime;
 
-        gameProviderSchedule.Config = JsonSerializer.Serialize(config);
+        gameRecordSchedule.Config = JsonSerializer.Serialize(config);
 
         var request = new GameRecordScheduleUpdateRequest
         {
-            GameRecordScheduleId = gameProviderSchedule.GameRecordScheduleId,
+            GameRecordScheduleId = gameRecordSchedule.GameRecordScheduleId,
             Config = JsonSerializer.Serialize(config)
         };
 
@@ -112,7 +98,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
             .GameRecordScheduleUpdateAsync(request, cancellationToken).ConfigureAwait(false);
 
         return updateResult.Success
-            ? await GetAsync(config.DataType, cancellationToken).ConfigureAwait(false)
+            ? await GetAsync(gameDataType, cancellationToken).ConfigureAwait(false)
             : null;
     }
 }

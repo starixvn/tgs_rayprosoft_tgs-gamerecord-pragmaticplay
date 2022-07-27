@@ -6,21 +6,20 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 public interface IGameRecordScheduleService
 {
     ValueTask<GameRecordScheduleReply?> GetAsync(
-        PragmaticPlayTransferGameDataType gameDataType,
-        CancellationToken cancellationToken = default);
+       PragmaticPlayTransferGameDataType gameDataType,
+       CancellationToken cancellationToken = default);
 
-    ScheduleConfig GetConfig(
-        GameRecordScheduleReply gameProviderSchedule);
+    ScheduleConfig GetConfig(GameRecordScheduleReply gameRecordSchedule);
 
     ValueTask<GameRecordScheduleReply?> InitAsync(
-        Guid gameProviderId,
-        PragmaticPlayTransferGameDataType gameDataType,
-        CancellationToken cancellationToken = default);
+      Guid gameProviderId,
+      PragmaticPlayTransferGameDataType gameDataType,
+      CancellationToken cancellationToken = default);
 
     ValueTask<GameRecordScheduleReply?> UpdateAsync(
-        GameRecordScheduleReply gameProviderSchedule,
-        DateTimeOffset? lastGameRecordTime,
-        DateTimeOffset nextTime,
-        DateTimeOffset sysTime,
-        CancellationToken cancellationToken = default);
+      GameRecordScheduleReply gameRecordSchedule,
+      PragmaticPlayTransferGameDataType gameDataType,
+      DateTimeOffset nextTime,
+      DateTimeOffset? lastGameRecordTime = null,
+      CancellationToken cancellationToken = default);
 }
