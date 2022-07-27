@@ -4,8 +4,8 @@ public record GameRecordInfoOptions
 {
     public string GameProviderCode { get; set; } = default!;
     public string GameProviderConfiguration { get; set; } = default!;
-    public int IntervalMinute { get; set; }
-    public int IntervalMinuteMax { get; set; }
-
-    public int LockSeconds { get; set; }
+    public double MaxIntervalMinute { get; set; } = 10d;
+    public double IntervalMinute { get; set; } = 10d;
+    public double LockMinute { get; set; } = 8.5d;
+    public double VirtualSportsIntervalMinute { get; set; } = 10d;
 }

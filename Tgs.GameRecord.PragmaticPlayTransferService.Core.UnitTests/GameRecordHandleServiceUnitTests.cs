@@ -21,8 +21,8 @@ internal class GameRecordHandleServiceUnitTests
         {
             GameProviderCode = GameProviderType.PragmaticPlayTransfer,
             GameProviderConfiguration = GameProviderConfigurations.PragmaticPlayTransfer,
-            IntervalMinuteMax = 10,
-            IntervalMinute = 10
+            MaxIntervalMinute = 10d,
+            IntervalMinute = 10d
         });
 
         var fakeUtensil = Substitute.For<IUtensil>();

@@ -3,5 +3,6 @@
 namespace Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 
 public record ManualMessageRequest(
-    PragmaticPlayTransferGameDataType DataType,
-    DateTimeOffset StartTime);
+    PragmaticPlayTransferGameDataType GameDataType,
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime);
