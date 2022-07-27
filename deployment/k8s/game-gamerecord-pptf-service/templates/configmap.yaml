@@ -18,5 +18,6 @@ data:
         "MaxIntervalMinute": 10,
         "IntervalMinute": 10,
         "LockMinute": 8.5
+        "VirtualSportsIntervalMinute": 10
       }
     }

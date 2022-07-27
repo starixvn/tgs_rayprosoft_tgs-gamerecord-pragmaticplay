@@ -58,11 +58,15 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices
 
                         var config = _gameRecordScheduleService.GetConfig(gameRecordSchedule);
 
+                        var startTime = gameDataType is not PragmaticPlayTransferGameDataType.VirtualSports ?
+                            config.NextTime :
+                            config.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinute);
+
                         var jobWorkerQuery = new JobWorkerQuery(
                             command.GameProviderId,
                             command.GameProviderCode,
                             gameDataType,
-                            StartTime: config.NextTime,
+                            StartTime: startTime,
                             EndTime: _systemClock.UtcNow);
 
                         var result = await _jobWorkerService
