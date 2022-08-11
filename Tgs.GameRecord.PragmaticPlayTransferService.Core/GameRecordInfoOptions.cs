@@ -8,4 +8,6 @@ public record GameRecordInfoOptions
     public double IntervalMinute { get; set; } = 10d;
     public double LockMinute { get; set; } = 8.5d;
     public double VirtualSportsIntervalMinute { get; set; } = 10d;
+
+    public double LiveDealerIntervalMinute { get; set; } = 1d;
 }

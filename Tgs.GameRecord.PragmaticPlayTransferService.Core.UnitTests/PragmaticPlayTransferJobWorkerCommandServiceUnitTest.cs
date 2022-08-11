@@ -31,7 +31,6 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
 
         var currentTime = DateTimeOffset.UtcNow;
 
-
         var startTime = currentTime.AddMinutes(gameRecordInfoOptions.Value.IntervalMinute * -1);
 
         var query = new JobWorkerQuery(
@@ -54,7 +53,6 @@ internal class PragmaticPlayTransferJobWorkerCommandServiceUnitTest
         var gameRecordQuery = new GameRecordQuery(
             query.GameDataType,
             query.StartTime);
-
 
         _ = fakeGameRecordQueryService.GetAsync(Arg.Is(gameRecordQuery))
             .Returns(gameRecordResult);
