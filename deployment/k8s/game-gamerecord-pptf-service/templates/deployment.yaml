@@ -49,7 +49,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: tgs-connections
-                  key: mongo-messaging
+                  key: mongo-gp-scheduler-messaging
             - name: ConnectionStrings__Redis
               valueFrom:
                 secretKeyRef:
