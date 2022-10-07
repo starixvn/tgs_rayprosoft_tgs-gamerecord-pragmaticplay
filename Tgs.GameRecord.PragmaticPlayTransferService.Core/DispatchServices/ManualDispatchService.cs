@@ -25,18 +25,12 @@ internal class ManualDispatchService : IGetService<ManualDispatchQuery, ManualDi
         CancellationToken cancellationToken = default)
     {
         var gameProviderId = await _utensil
-            .GetGameProviderIdAsync()
+            .GetGameProviderIdAsync(
+                cancellationToken)
             .ConfigureAwait(false);
 
-        if (!gameProviderId.HasValue)
-        {
-            return new ManualDispatchResult(
-                Success: false,
-                Message: $"The game provider cannot be found.({_gameRecordInfoOptions.GameProviderCode})");
-        }
-
         var jobWorkerQuery = new JobWorkerQuery(
-            GameProviderId: gameProviderId.Value,
+            GameProviderId: gameProviderId,
             GameProviderCode: _gameRecordInfoOptions.GameProviderCode,
             GameDataType: query.GameDataType,
             StartTime: query.StartTime,

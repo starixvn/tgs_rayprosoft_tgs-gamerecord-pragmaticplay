@@ -4,11 +4,20 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 public interface IUtensil
 {
-    ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
+    ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(
+        Guid brandId,
+        Guid gameProviderId,
+        CancellationToken cancellationToken = default);
 
-    ValueTask<int?> GetGameIdAsync(Guid gameProviderId, string gameExternalId);
+    ValueTask<int?> GetGameIdAsync(
+        Guid gameProviderId,
+        string gameExternalId,
+        CancellationToken cancellationToken = default);
 
-    ValueTask<Guid?> GetGameProviderIdAsync();
+    ValueTask<Guid> GetGameProviderIdAsync(
+        CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerModel?> GetPlayerAsync(string playerCode);
+    ValueTask<PlayerModel?> GetPlayerAsync(
+        string playerCode,
+        CancellationToken cancellationToken = default);
 }

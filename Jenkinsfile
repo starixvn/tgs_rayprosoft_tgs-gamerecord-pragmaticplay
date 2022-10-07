@@ -7,6 +7,7 @@ pipeline {
 	environment {
 		BuildConfiguration="Debug"
         ImageName="pgtgs/game-gamerecord-pptf-service"
+        ImageManualName="pgtgs/game-gamerecord-pptf-manualservice"
 	}
 
 	stages {
@@ -67,11 +68,23 @@ pipeline {
 			}
 		}
 
+        stage('Build Manual Service Docker Image') {
+            steps {
+                sh 'dotnet build "Tgs.GameRecord.PragmaticPlayTransferManualService/Tgs.GameRecord.PragmaticPlayTransferManualService.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageManualName:${TAG}" --no-restore '
+            }
+        }
+
 		stage('Push Docker Image') {
 			steps {
 				sh 'docker push $ImageName:${TAG}'
 			}
 		}
+
+        stage('Push Manual Docker Image') {
+            steps {
+                sh 'docker push $ImageManualName:${TAG}'
+            }
+        }
 
 		stage('Deploy') {
             when {
@@ -117,6 +130,50 @@ pipeline {
                         """
                         sh """
                             cat << EOF | yq e -P | helm template deployment/k8s/game-gamerecord-pptf-service \
+                                -n ${kube_ns} \
+                                --set image.tag=${TAG} \
+                                -f - \
+                                | kubectl -n ${kube_ns} apply -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated],
+                                "resources": $resources,
+                                "autoscaling": $autoscaling
+                            }
+                        """
+                    }
+                }
+			}
+		}
+
+		stage('Deploy Manual to k8s') {
+			steps {
+                script {
+                    withKubeConfig([credentialsId: env.k8s_config]) {
+                        def resources = getResources(env.k8s_config, env.kube_ns, "game-gamerecord-pptf-manualservice")
+                        def dedicated = getTgsSettings(env.k8s_config, env.kube_ns, "dedicated")
+                        def node_selector = getTgsSettings(env.k8s_config, env.kube_ns, "node-selector")
+                        def autoscaling = getAutoscaling(env.k8s_config, env.kube_ns, "game-gamerecord-pptf-manualservice")
+
+                        println resources
+                        println dedicated
+                        println node_selector
+                        println autoscaling
+
+                        sh """
+                            cat << EOF | yq e -P | helm template deployment/k8s/game-gamerecord-pptf-manualservice \
+                                -n ${kube_ns} \
+                                --set image.tag=${TAG} \
+                                -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated],
+                                "resources": $resources,
+                                "autoscaling": $autoscaling
+                            }
+                        """
+                        sh """
+                            cat << EOF | yq e -P | helm template deployment/k8s/game-gamerecord-pptf-manualservice \
                                 -n ${kube_ns} \
                                 --set image.tag=${TAG} \
                                 -f - \

@@ -3,14 +3,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 
-internal class GameRecordQueryService : IGetService<GameRecordQuery, GameRecordResult>
+internal class GameRecordGetService : IGetService<GameRecordQuery, GameRecordResult>
 {
     private readonly IGameRecordListClient _gameRecordListClient;
-    private readonly IGetService<GameRoundHandleQuery, bool> _handleService;
+    private readonly IGetService<GameRoundQuery, bool> _handleService;
 
-    public GameRecordQueryService(
+    public GameRecordGetService(
         IGameRecordListClient gameRecordListClient,
-        IGetService<GameRoundHandleQuery, bool> handleService)
+        IGetService<GameRoundQuery, bool> handleService)
     {
         _gameRecordListClient = gameRecordListClient ?? throw new ArgumentNullException(nameof(gameRecordListClient));
         _handleService = handleService;
@@ -50,26 +50,28 @@ internal class GameRecordQueryService : IGetService<GameRecordQuery, GameRecordR
         {
             count++;
 
-            var isSuccess = await _handleService.GetAsync(
-                    new GameRoundHandleQuery(
-                        new GameRecordInfo(
-                            data.GameProviderCode,
-                            data.GameProviderId,
-                            data.PlayerCode,
-                            data.Status,
-                            data.ClientStatus,
-                            data.ExternalRoundId,
-                            data.ExternalGameId,
-                            data.ExternalCreatedOn,
-                            data.ExternalClosedOn,
-                            data.BetAmount,
-                            data.ValidBetAmount,
-                            data.PlayerWinLoss,
-                            data.Commission,
-                            data.Turnover,
-                            data.SettleAmount,
-                            data.TieBetAdjustment,
-                            data.AdditionalData)),
+            var gameRound = new GameRoundQuery(
+                data.GameProviderCode,
+                data.GameProviderId,
+                data.PlayerCode,
+                data.Status,
+                data.ClientStatus,
+                data.ExternalRoundId,
+                data.ExternalGameId,
+                data.ExternalCreatedOn!.Value,
+                data.ExternalClosedOn,
+                data.BetAmount,
+                data.ValidBetAmount,
+                data.PlayerWinLoss,
+                data.Commission,
+                data.Turnover,
+                data.SettleAmount,
+                data.TieBetAdjustment,
+                data.AdditionalData);
+
+            var isSuccess = await _handleService
+                .GetAsync(
+                    gameRound,
                     cancellationToken)
                 .ConfigureAwait(false);
 

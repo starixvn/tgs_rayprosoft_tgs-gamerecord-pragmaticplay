@@ -27,7 +27,7 @@ internal class GameRecordHandleServiceUnitTests
 
         var fakeUtensil = Substitute.For<IUtensil>();
         var fakeMessageSender = Substitute.For<IMessageSender>();
-        var fakeLogger = NullLogger<GameRecordHandleService>.Instance;
+        var fakeLogger = NullLogger<GameRoundGetService>.Instance;
 
         var gameRecord = new GameRecordInfo(
             GameProviderType.PragmaticPlayTransfer,
@@ -77,9 +77,9 @@ internal class GameRecordHandleServiceUnitTests
                 Arg.Is(gameRecord.GameProviderId))
             .Returns(gameProviderConfigurationId);
 
-        var query = new GameRoundHandleQuery(gameRecord);
+        var query = new GameRoundQuery(gameRecord);
 
-        var sut = new GameRecordHandleService(
+        var sut = new GameRoundGetService(
             fakeUtensil,
             fakeMessageSender,
             fakeOptions,
