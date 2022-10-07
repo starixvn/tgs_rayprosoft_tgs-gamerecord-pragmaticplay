@@ -86,7 +86,6 @@ builder.Services
                 var configuration = sp.GetRequiredService<IConfiguration>();
                 options.Url = configuration.GetConnectionString("Nats");
             })
-            .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.pptf", "gp.gamerecord.schedule")
             .AddProcessor<ManualMessageHandler>("gp.gamerecord.manual.pptf", "gp.gamerecord.manual");
     })
     .AddMongoMessageQueue(config =>
