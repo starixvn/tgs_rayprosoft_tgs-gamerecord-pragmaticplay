@@ -22,75 +22,90 @@ internal class UtensilMemoryCachedRepository : IUtensil
         _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
     }
 
-    public async ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+    public async ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(
+        Guid brandId,
+        Guid gameProviderId,
+        CancellationToken cancellationToken = default)
     {
         var cacheKey = $"{brandId}:{gameProviderId}";
 
-        if (_memoryCache.TryGetValue(cacheKey, out Guid? configurationId))
-            return configurationId;
-
-        configurationId = await _utensil
-               .GetBrandGetGameProviderConfigurationIdAsync(brandId, gameProviderId)
-               .ConfigureAwait(false);
-
-        if (configurationId.HasValue)
+        if (!_memoryCache.TryGetValue(cacheKey, out Guid? configurationId))
         {
-            _ = _memoryCache.Set(cacheKey, configurationId, _absoluteExpirationRelativeToNow);
-        }
+            configurationId = await _utensil
+                    .GetBrandGetGameProviderConfigurationIdAsync(
+                        brandId,
+                        gameProviderId,
+                        cancellationToken)
+                   .ConfigureAwait(false);
 
+            if (configurationId.HasValue)
+            {
+                _ = _memoryCache.Set(cacheKey, configurationId, _absoluteExpirationRelativeToNow);
+            }
+        }
         return configurationId;
     }
 
-    public async ValueTask<int?> GetGameIdAsync(Guid gameProviderId, string gameExternalId)
+    public async ValueTask<int?> GetGameIdAsync(
+        Guid gameProviderId,
+        string gameExternalId,
+        CancellationToken cancellationToken = default)
     {
         var cacheKey = $"{gameProviderId}:{gameExternalId}";
 
-        if (_memoryCache.TryGetValue(cacheKey, out int? gameId))
-            return gameId;
-
-        gameId = await _utensil
-            .GetGameIdAsync(gameProviderId, gameExternalId)
-            .ConfigureAwait(false);
-
-        if (gameId.HasValue)
+        if (!_memoryCache.TryGetValue(cacheKey, out int? gameId))
         {
-            _ = _memoryCache.Set(cacheKey, gameId, _absoluteExpirationRelativeToNow);
-        }
+            gameId = await _utensil
+                .GetGameIdAsync(
+                    gameProviderId,
+                    gameExternalId,
+                    cancellationToken)
+                .ConfigureAwait(false);
 
+            if (gameId.HasValue)
+            {
+                _ = _memoryCache.Set(cacheKey, gameId, _absoluteExpirationRelativeToNow);
+            }
+        }
         return gameId;
     }
 
-    public async ValueTask<Guid?> GetGameProviderIdAsync()
+    public async ValueTask<Guid> GetGameProviderIdAsync(
+        CancellationToken cancellationToken = default)
     {
         var cacheKey = _gameRecordInfo.GameProviderCode;
 
-        if (_memoryCache.TryGetValue(cacheKey, out Guid? gameProviderId))
-            return gameProviderId;
-
-        gameProviderId = await _utensil.GetGameProviderIdAsync()
-                .ConfigureAwait(false);
-
-        if (!gameProviderId.HasValue)
+        if (!_memoryCache.TryGetValue(cacheKey, out Guid gameProviderId))
         {
-            _ = _memoryCache.Set(cacheKey, gameProviderId, _absoluteExpirationRelativeToNow);
+            gameProviderId = await _utensil
+                    .GetGameProviderIdAsync(
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+            _ = _memoryCache.Set(cacheKey, gameProviderId);
         }
 
         return gameProviderId;
     }
 
-    public async ValueTask<PlayerModel?> GetPlayerAsync(string playerCode)
+    public async ValueTask<PlayerModel?> GetPlayerAsync(
+        string playerCode,
+        CancellationToken cancellationToken = default)
     {
         var cacheKey = playerCode;
 
-        if (_memoryCache.TryGetValue(cacheKey, out PlayerModel? player))
-            return player;
-
-        player = await _utensil.GetPlayerAsync(playerCode)
-            .ConfigureAwait(false);
-
-        if (player is not null)
+        if (!_memoryCache.TryGetValue(cacheKey, out PlayerModel? player))
         {
-            _ = _memoryCache.Set(cacheKey, player, _absoluteExpirationRelativeToNow);
+            player = await _utensil
+                .GetPlayerAsync(
+                    playerCode,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            if (player is not null)
+            {
+                _ = _memoryCache.Set(cacheKey, player, _absoluteExpirationRelativeToNow);
+            }
         }
 
         return player;

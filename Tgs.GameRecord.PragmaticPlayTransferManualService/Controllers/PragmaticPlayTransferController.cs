@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.GameProviders.Client;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
-using Tgs.GameRecord.PragmaticPlayTransferService.ViewModels;
 using Tgs.ServiceUtility;
+using Tgs.GameRecord.PragmaticPlayTransferManualService.ViewModels;
 
-namespace Tgs.GameRecord.PragmaticPlayTransferService.Controllers;
+namespace Tgs.GameRecord.PragmaticPlayTransferManualService.Controllers;
 
 [Route("PPTF")]
 [ApiController]

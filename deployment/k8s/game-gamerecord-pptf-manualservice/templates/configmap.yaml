@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "game-gamerecord-pptf-manualservice.fullname" . }}
+  labels:
+    {{- include "game-gamerecord-pptf-manualservice.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+      "GameRecord": {
+        "GameProvidersBaseUrl": "http://game-gameproviders",
+        "GameProvidersQueryServerBaseUrl": "http://game-gameprovider-queryserver",
+        "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
+      },
+      "GameRecordInfo": {
+        "MongoDefine": "gp.gamerecord.database.manual",
+        "MongoGlobPattern": "tgs.gp.gamerecord.database.manual.pptf",
+        "GameProviderCode": "PPTF",
+        "GameProviderConfiguration": "PPTFConfiguration",
+        "MaxIntervalMinute": 10,
+        "IntervalMinute": 10,
+        "LockMinute": 8.5,
+        "VirtualSportsIntervalMinute": 10,
+        "LiveDealerIntervalMinute": 1
+      }
+    }
+  monitor.settings.json: |
+    {
+      "Metrics": {
+        "MetricCount": "1"
+      },
+      "Logging":{
+        "Console": {
+          "FormatterName": "json"
+        },
+        "LogLevel": {
+          "Default": "Warning",
+          "Microsoft": "Warning",
+          "Microsoft.Diagnostics": "Warning",
+          "Microsoft.Hosting.Lifetime": "Information"
+        }
+      }
+    }

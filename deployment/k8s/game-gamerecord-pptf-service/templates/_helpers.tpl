@@ -47,10 +47,11 @@ Selector labels
 */}}
 {{- define "game-gamerecord-pptf-service.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "game-gamerecord-pptf-service.name" . }}
-app: {{ include "game-gamerecord-pptf-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app: {{ include "game-gamerecord-pptf-service.name" . }}
 tgs.kind: game
 tgs.game.kind: gamerecord
+tgs.gameprovider.kind: pptf
 {{- end }}
 
 {{/*

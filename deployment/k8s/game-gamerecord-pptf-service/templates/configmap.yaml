@@ -13,6 +13,8 @@ data:
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
       },
       "GameRecordInfo": {
+        "MongoDefine": "gp.gamerecord.database",
+        "MongoGlobPattern": "tgs.gp.gamerecord.database.round.pptf",
         "GameProviderCode": "PPTF",
         "GameProviderConfiguration": "PPTFConfiguration",
         "MaxIntervalMinute": 10,
@@ -20,5 +22,22 @@ data:
         "LockMinute": 8.5,
         "VirtualSportsIntervalMinute": 10,
         "LiveDealerIntervalMinute": 1
+      }
+    }
+  monitor.settings.json: |
+    {
+      "Metrics": {
+        "MetricCount": "1"
+      },
+      "Logging":{
+        "Console": {
+          "FormatterName": "json"
+        },
+        "LogLevel": {
+          "Default": "Warning",
+          "Microsoft": "Warning",
+          "Microsoft.Diagnostics": "Warning",
+          "Microsoft.Hosting.Lifetime": "Information"
+        }
       }
     }

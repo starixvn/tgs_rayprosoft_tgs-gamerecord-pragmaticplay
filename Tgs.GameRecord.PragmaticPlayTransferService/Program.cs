@@ -7,6 +7,7 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameRecord.PragmaticPlayTransferService;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core;
 using Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 using Tgs.MessageQueue.MongoDB.Configuration;
 
@@ -72,6 +73,8 @@ builder.Services
         },
         (sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
 
+var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>();
+
 builder.Services
     .AddMessageQueue()
     .AddNatsMessageQueue(natsConfig =>
@@ -82,18 +85,14 @@ builder.Services
                 var configuration = sp.GetRequiredService<IConfiguration>();
                 options.Url = configuration.GetConnectionString("Nats");
             })
-            .AddHandler<ScheduleMessageHandler>(
-            "gp.gamerecord.schedule.pptf",
-            "gp.gamerecord.schedule")
-            .AddProcessor<ManualMessageHandler>(
-                "gp.gamerecord.manual.pptf",
-                "gp.gamerecord.manual");
+            .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.pptf", "gp.gamerecord.schedule")
+            .AddProcessor<ManualMessageHandler>("gp.gamerecord.manual.pptf", "gp.gamerecord.manual");
     })
     .AddMongoMessageQueue(config =>
     {
         _ = config
             .DefineMessageQueue(
-                "gp.gamerecord.database",
+                gameRecordInfo.MongoDefine,
                 sp => new MongoMessageQueueBuilderOptions
                 {
                     ConnectionString =
@@ -102,10 +101,7 @@ builder.Services
                 });
     })
     .ClearAllExchanges()
-    .AddMongoGlobPatternExchange(
-        "tgs.gp.gamerecord.database.round.pptf",
-        "gp.gamerecord.database",
-        "tgs.gp.gamerecord.database.round.pptf");
+    .AddMongoGlobPatternExchange(gameRecordInfo.MongoGlobPattern, gameRecordInfo.MongoDefine, gameRecordInfo.MongoGlobPattern);
 
 builder.Services
     .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
@@ -138,6 +134,7 @@ builder.Services
                    || !httpContext.Request.Path.StartsWithSegments("/swagger")
                    && !httpContext.Request.Path.StartsWithSegments("/healthz")
                    && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                   && !httpContext.Request.Path.StartsWithSegments("/metrics")
                    && !new[] { "html", "ico", "png", "jpg" }.Any(
                        ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
         };

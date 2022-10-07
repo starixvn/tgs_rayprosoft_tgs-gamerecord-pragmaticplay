@@ -15,7 +15,7 @@ internal class GameRecordQueryServiceUnitTests
     public async Task Normal_Process()
     {
         var fakeGameRecordListClient = Substitute.For<IGameRecordListClient>();
-        var fakeHandleService = Substitute.For<IGetService<GameRoundHandleQuery, bool>>();
+        var fakeHandleService = Substitute.For<IGetService<GameRoundQuery, bool>>();
 
         var externalClosedOn = DateTimeOffset.UtcNow;
         var nextTime = DateTimeOffset.UtcNow;
@@ -66,10 +66,10 @@ internal class GameRecordQueryServiceUnitTests
                 Arg.Is(query.StartTime))
             .Returns(gameRecordResponse);
 
-        _ = fakeHandleService.GetAsync(Arg.Any<GameRoundHandleQuery>())
+        _ = fakeHandleService.GetAsync(Arg.Any<GameRoundQuery>())
             .Returns(true);
 
-        var sut = new GameRecordQueryService(fakeGameRecordListClient, fakeHandleService);
+        var sut = new GameRecordGetService(fakeGameRecordListClient, fakeHandleService);
 
         var actual = await sut.GetAsync(query).ConfigureAwait(false);
 

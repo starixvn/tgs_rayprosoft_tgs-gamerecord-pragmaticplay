@@ -10,12 +10,13 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.17.1" />
     <PackageReference Include="Scrutor" Version="4.2.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
-    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.43" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
+    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.45" />
     <PackageReference Include="Tgs.GameProviders.QueryServer.Client" Version="0.0.16" />
     <PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.GameRounds.Client" Version="0.0.31" />
     <PackageReference Include="Tgs.MessageQueue" Version="2.1.0" />
-    <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
   </ItemGroup>
 
 </Project>

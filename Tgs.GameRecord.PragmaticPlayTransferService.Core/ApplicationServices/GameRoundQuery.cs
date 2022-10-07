@@ -1,8 +1,8 @@
 ﻿using Tgs.GameProviders.Client;
 
-namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
+namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 
-public record GameRecordInfo(
+public record GameRoundQuery(
     string GameProviderCode,
     Guid GameProviderId,
     string PlayerCode,
@@ -10,7 +10,7 @@ public record GameRecordInfo(
     GameRecordRoundClientStatus ClientStatus,
     string ExternalRoundId,
     string ExternalGameId,
-    DateTimeOffset? ExternalCreatedOn,
+    DateTimeOffset ExternalCreatedOn,
     DateTimeOffset? ExternalClosedOn,
     decimal? BetAmount,
     decimal? ValidBetAmount,
