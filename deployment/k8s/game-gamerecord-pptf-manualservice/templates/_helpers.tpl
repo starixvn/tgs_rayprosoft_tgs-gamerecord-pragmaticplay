@@ -51,7 +51,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app: {{ include "game-gamerecord-pptf-manualservice.name" . }}
 tgs.kind: game
 tgs.game.kind: gamerecord
-tgs.gameprovider.kind: pp
+tgs.gameprovider.kind: pptf
 {{- end }}
 
 {{/*
