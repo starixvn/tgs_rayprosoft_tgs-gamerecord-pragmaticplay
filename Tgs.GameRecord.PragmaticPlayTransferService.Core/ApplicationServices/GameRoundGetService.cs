@@ -11,9 +11,8 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
 {
     private readonly ILogger<GameRoundGetService> _logger;
     private readonly IMessageSender _messageSender;
-    private readonly string _subject;
     private readonly IUtensil _utensil;
-
+    private readonly GameRecordInfoOptions _gameRecordInfo;
     public GameRoundGetService(
         IUtensil utensil,
         IMessageSender messageSender,
@@ -23,9 +22,7 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-        var gameRecordInfo = options.Value;
-        _subject = $"tgs.gp.gamerecord.database.round.{gameRecordInfo.GameProviderCode.ToLower()}";
+        _gameRecordInfo = options.Value;
     }
 
     public async ValueTask<bool> GetAsync(
@@ -96,12 +93,14 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
             Success: success
             );
 
-        _logger.LogInformation("LogOn:{logOn}  Subject:{subject} MessageRequest:{request}", DateTime.Now.ToString("o"), _subject, messageRequest);
+        _logger.LogInformation("LogOn:{logOn}  Subject:{subject} MessageRequest:{request}", DateTime.Now.ToString("o"), _gameRecordInfo.MongoGlobPattern, messageRequest);
 
-        await _messageSender.PublishAsync(
-                _subject,
-            messageRequest.ToBson(), cancellationToken:
-            cancellationToken)
+        await _messageSender
+            .PublishAsync(
+                _gameRecordInfo.MongoGlobPattern,
+                messageRequest.ToBson(),
+                cancellationToken:
+                cancellationToken)
             .ConfigureAwait(false);
 
         return success;
