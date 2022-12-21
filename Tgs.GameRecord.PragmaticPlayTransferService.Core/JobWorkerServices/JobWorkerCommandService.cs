@@ -8,8 +8,8 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.JobWorkerServices;
 internal class JobWorkerCommandService : IGetService<JobWorkerQuery, JobWorkerResult>
 {
     private readonly IGetService<GameRecordQuery, GameRecordResult> _gameRecordQueryService;
-    private readonly ISystemClock _systemClock;
     private readonly ILogger<JobWorkerCommandService> _logger;
+    private readonly ISystemClock _systemClock;
 
     public JobWorkerCommandService(
         ILogger<JobWorkerCommandService> logger,

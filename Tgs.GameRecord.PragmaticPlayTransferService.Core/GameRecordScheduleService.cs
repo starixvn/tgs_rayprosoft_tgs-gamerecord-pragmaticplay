@@ -9,17 +9,17 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 internal class GameRecordScheduleService : IGameRecordScheduleService
 {
+    private readonly IGameRecordSchedulesClient _client;
     private readonly GameRecordInfoOptions _gameRecordInfo;
     private readonly double _intervalMinute;
-    private readonly IGameRecordSchedulesGrpc _scheduleClient;
     private readonly ISystemClock _systemClock;
 
     public GameRecordScheduleService(
-        IGameRecordSchedulesGrpc scheduleClient,
+        IGameRecordSchedulesClient client,
         ISystemClock systemClock,
         IOptions<GameRecordInfoOptions> options)
     {
-        _scheduleClient = scheduleClient ?? throw new ArgumentNullException(nameof(scheduleClient));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _gameRecordInfo = options.Value;
         _intervalMinute = (_gameRecordInfo.IntervalMinute > _gameRecordInfo.MaxIntervalMinute)
@@ -39,7 +39,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
             CurrencyCode = string.Empty
         };
 
-        return _scheduleClient.GameRecordScheduleGetAsync(request, cancellationToken);
+        return _client.GameRecordScheduleGetAsync(request, cancellationToken);
     }
 
     public ScheduleConfig GetConfig(GameRecordScheduleReply gameRecordSchedule)
@@ -69,7 +69,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
             Config = JsonSerializer.Serialize(config)
         };
 
-        _ = await _scheduleClient.GameRecordScheduleAddAsync(addRequest, cancellationToken).ConfigureAwait(false);
+        _ = await _client.GameRecordScheduleAddAsync(addRequest, cancellationToken).ConfigureAwait(false);
 
         return await GetAsync(gameDataType, cancellationToken).ConfigureAwait(false);
     }
@@ -94,7 +94,7 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
             Config = JsonSerializer.Serialize(config)
         };
 
-        var updateResult = await _scheduleClient
+        var updateResult = await _client
             .GameRecordScheduleUpdateAsync(request, cancellationToken).ConfigureAwait(false);
 
         return updateResult.Success

@@ -1,6 +1,4 @@
-﻿using Tgs.GameRecord.PragmaticPlayTransferManualService;
-
-namespace Tgs.GameRecord.PragmaticPlayTransferManualService.DependencyInjection;
+﻿namespace Tgs.GameRecord.PragmaticPlayTransferManualService.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

@@ -3,7 +3,6 @@ using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
-using Tgs.GameRecord.PragmaticPlayTransferManualService.MessageHandler;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferManualService.MessageHandler;
 

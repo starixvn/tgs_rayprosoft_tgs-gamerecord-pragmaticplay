@@ -1,5 +1,4 @@
-﻿
-using Tgs.GameRecord.PragmaticPlayTransferService;
+﻿using Tgs.GameRecord.PragmaticPlayTransferService;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

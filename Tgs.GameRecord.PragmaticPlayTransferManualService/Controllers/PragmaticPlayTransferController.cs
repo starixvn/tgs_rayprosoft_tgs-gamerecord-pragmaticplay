@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.GameProviders.Client;
+using Tgs.GameRecord.PragmaticPlayTransferManualService.ViewModels;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 using Tgs.ServiceUtility;
-using Tgs.GameRecord.PragmaticPlayTransferManualService.ViewModels;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferManualService.Controllers;
 

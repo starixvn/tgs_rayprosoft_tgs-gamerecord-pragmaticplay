@@ -7,7 +7,6 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG BuildConfiguration=Release
-RUN --mount=type=secret,id=nuget,dst=/pat cp /pat ~/.nuget/NuGet/NuGet.Config
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Tgs.GameRecord.PragmaticPlayTransferManualService/Tgs.GameRecord.PragmaticPlayTransferManualService.csproj", "Tgs.GameRecord.PragmaticPlayTransferManualService/"]

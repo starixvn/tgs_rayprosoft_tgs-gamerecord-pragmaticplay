@@ -6,11 +6,11 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.GameRecord.PragmaticPlayTransferService.Core;
-using Tgs.MessageQueue.MongoDB.Configuration;
+using Tgs.GameRecord.PragmaticPlayTransferManualService;
 using Tgs.GameRecord.PragmaticPlayTransferManualService.DependencyInjection;
 using Tgs.GameRecord.PragmaticPlayTransferManualService.MessageHandler;
-using Tgs.GameRecord.PragmaticPlayTransferManualService;
+using Tgs.GameRecord.PragmaticPlayTransferService.Core;
+using Tgs.MessageQueue.MongoDB.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +47,7 @@ builder.Services
     .AddGameRecordAwcService((options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.ConnectionString = configuration.GetConnectionString("Redis");
+        options.ConnectionString = configuration.GetConnectionString("Redis")!;
     });
 
 builder.Services
@@ -84,7 +84,7 @@ builder.Services
             .ConfigQueueOptions((options, sp) =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
-                options.Url = configuration.GetConnectionString("Nats");
+                options.Url = configuration.GetConnectionString("Nats")!;
             })
             .AddProcessor<ManualMessageHandler>("gp.gamerecord.manual.pptf", "gp.gamerecord.manual");
     })
@@ -96,7 +96,7 @@ builder.Services
                 sp => new MongoMessageQueueBuilderOptions
                 {
                     ConnectionString =
-                        sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging"),
+                        sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging")!,
                     MessageQueue = MessageQueue.Default
                 });
     })

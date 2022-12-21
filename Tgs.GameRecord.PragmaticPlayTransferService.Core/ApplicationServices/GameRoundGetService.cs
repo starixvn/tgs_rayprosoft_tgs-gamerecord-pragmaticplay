@@ -9,10 +9,11 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core.ApplicationServices;
 
 internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
 {
+    private readonly GameRecordInfoOptions _gameRecordInfo;
     private readonly ILogger<GameRoundGetService> _logger;
     private readonly IMessageSender _messageSender;
     private readonly IUtensil _utensil;
-    private readonly GameRecordInfoOptions _gameRecordInfo;
+
     public GameRoundGetService(
         IUtensil utensil,
         IMessageSender messageSender,

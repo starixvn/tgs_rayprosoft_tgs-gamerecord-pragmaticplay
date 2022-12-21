@@ -46,7 +46,7 @@ builder.Services
     .AddGameRecordAwcService((options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.ConnectionString = configuration.GetConnectionString("Redis");
+        options.ConnectionString = configuration.GetConnectionString("Redis")!;
     });
 
 builder.Services
@@ -83,7 +83,7 @@ builder.Services
             .ConfigQueueOptions((options, sp) =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
-                options.Url = configuration.GetConnectionString("Nats");
+                options.Url = configuration.GetConnectionString("Nats")!;
             })
             .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.pptf", "gp.gamerecord.schedule");
     })
@@ -95,7 +95,7 @@ builder.Services
                 sp => new MongoMessageQueueBuilderOptions
                 {
                     ConnectionString =
-                        sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging"),
+                        sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging")!,
                     MessageQueue = MessageQueue.Default
                 });
     })
