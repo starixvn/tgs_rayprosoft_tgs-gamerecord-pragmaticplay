@@ -9,7 +9,7 @@ data:
     {
       "GameRecord": {
         "GameProvidersBaseUrl": "http://game-gameproviders",
-        "GameCommandClientBaseUrl": "http://game-gameprovider-queryserver",
+        "GameCommandClientBaseUrl": "http://game-gamecommand",
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
       },
       "GameRecordInfo": {
