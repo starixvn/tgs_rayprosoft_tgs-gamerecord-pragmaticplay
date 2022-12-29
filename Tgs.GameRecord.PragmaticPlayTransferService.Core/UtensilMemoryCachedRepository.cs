@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Tgs.GameProviders.QueryServer.Models;
+using Tgs.GameCommand.Common;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
@@ -88,13 +88,13 @@ internal class UtensilMemoryCachedRepository : IUtensil
         return gameProviderId;
     }
 
-    public async ValueTask<PlayerModel?> GetPlayerAsync(
+    public async ValueTask<PlayerInfo?> GetPlayerAsync(
         string playerCode,
         CancellationToken cancellationToken = default)
     {
         var cacheKey = playerCode;
 
-        if (!_memoryCache.TryGetValue(cacheKey, out PlayerModel? player))
+        if (!_memoryCache.TryGetValue(cacheKey, out PlayerInfo? player))
         {
             player = await _utensil
                 .GetPlayerAsync(

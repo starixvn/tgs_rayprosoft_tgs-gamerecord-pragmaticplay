@@ -1,4 +1,4 @@
-apiVersion: v1
+﻿apiVersion: v1
 kind: ConfigMap
 metadata:
   name: configmap-{{ include "game-gamerecord-pptf-service.fullname" . }}
@@ -9,7 +9,7 @@ data:
     {
       "GameRecord": {
         "GameProvidersBaseUrl": "http://game-gameproviders",
-        "GameProvidersQueryServerBaseUrl": "http://game-gameprovider-queryserver",
+        "GameCommandClientBaseUrl": "http://game-gameprovider-queryserver",
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
       },
       "GameRecordInfo": {

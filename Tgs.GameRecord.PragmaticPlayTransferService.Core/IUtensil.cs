@@ -1,4 +1,4 @@
-﻿using Tgs.GameProviders.QueryServer.Models;
+﻿using Tgs.GameCommand.Common;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
@@ -17,7 +17,7 @@ public interface IUtensil
     ValueTask<Guid> GetGameProviderIdAsync(
         CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerModel?> GetPlayerAsync(
+    ValueTask<PlayerInfo?> GetPlayerAsync(
         string playerCode,
         CancellationToken cancellationToken = default);
 }

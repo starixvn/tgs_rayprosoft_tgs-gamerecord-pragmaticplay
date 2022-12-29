@@ -1,4 +1,4 @@
-namespace Tgs.GameRecord.PragmaticPlayTransferManualService.MessageHandler;
+﻿namespace Tgs.GameRecord.PragmaticPlayTransferManualService.MessageHandler;
 
 public record ScheduleMessageModel(
         Guid GameProviderId,

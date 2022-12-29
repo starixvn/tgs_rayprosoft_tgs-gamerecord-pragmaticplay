@@ -3,8 +3,8 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
 using StackExchange.Redis;
+using Tgs.GameCommand.Client;
 using Tgs.GameProviders.Client;
-using Tgs.GameProviders.QueryServer.Client;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core;
 using Tgs.GameRecordSchedules.Client;
 
@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         Action<GameRecordInfoOptions, IServiceProvider> configure,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
-        Action<GameProvidersQueryServerClientOptions, IServiceProvider> gameProvidersQueryServerClientOptions,
+        Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
         Action<GameRecordSchedulesClientOptions, IServiceProvider> gameRecordSchedulesClientOptions,
         Func<IServiceProvider, IDatabase> redisDatabaseResolver)
         => services
@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
                 Assembly.GetExecutingAssembly(),
                 ServiceLifetime.Transient)
             .AddGameProvidersClient(gameProvidersClientOptions)
-            .AddGameProvidersQueryServerClient(gameProvidersQueryServerClientOptions)
+            .AddGameCommandClient(gameCommandClientOptions)
             .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
             .AddSingleton<ISystemClock, SystemClock>()
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()

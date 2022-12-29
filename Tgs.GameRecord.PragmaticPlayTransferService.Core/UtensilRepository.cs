@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Options;
-using Tgs.GameProviders.QueryServer.Client;
-using Tgs.GameProviders.QueryServer.Models;
+using Tgs.GameCommand.Client;
+using Tgs.GameCommand.Common;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 internal class UtensilRepository : IUtensil
 {
-    private readonly IGameProvidersQueryServerClient _client;
+    private readonly IGameCommandClient _client;
     private readonly GameRecordInfoOptions _gameRecordInfo;
 
     public UtensilRepository(
-        IGameProvidersQueryServerClient client,
+        IGameCommandClient client,
         IOptions<GameRecordInfoOptions> options)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
@@ -50,7 +50,7 @@ internal class UtensilRepository : IUtensil
             .ConfigureAwait(false)
         ?? throw new Exception($"The identifier for this game provider does not exist.({_gameRecordInfo.GameProviderCode})");
 
-    public ValueTask<PlayerModel?> GetPlayerAsync(
+    public ValueTask<PlayerInfo?> GetPlayerAsync(
         string playerCode,
         CancellationToken cancellationToken = default)
         => _client

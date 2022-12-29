@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using MongoDB.Messaging;
@@ -64,7 +64,7 @@ builder.Services
         (options, sp) =>
         {
             var configuration = sp.GetRequiredService<IConfiguration>();
-            options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersQueryServerBaseUrl");
+            options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
         },
         (options, sp) =>
         {

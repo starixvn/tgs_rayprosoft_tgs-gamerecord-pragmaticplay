@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 using Tgs.MessageQueue;
