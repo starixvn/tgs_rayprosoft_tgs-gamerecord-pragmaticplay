@@ -120,5 +120,4 @@ internal class UtensilRepository : IUtensil
         }
         return playerModel;
     }
-
 }

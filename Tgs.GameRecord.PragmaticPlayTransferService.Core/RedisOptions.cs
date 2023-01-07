@@ -1,5 +1,4 @@
-﻿using Tgs.GameRecord.PragmaticPlayTransferService;
-namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
+﻿namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 public record RedisOptions
 {

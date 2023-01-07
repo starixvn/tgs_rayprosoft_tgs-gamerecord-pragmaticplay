@@ -51,7 +51,6 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 builder.Services.AddGameRecordCore(
     (options, sp) =>
     {
@@ -175,4 +174,3 @@ app.MapHealthChecks("/healthz");
 _ = app.UseGameRecordRegister();
 
 app.Run();
-

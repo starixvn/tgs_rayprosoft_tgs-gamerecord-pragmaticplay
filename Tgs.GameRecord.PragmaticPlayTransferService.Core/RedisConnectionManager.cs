@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Tgs.GameRecord.PragmaticPlayTransferService;
-using Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
