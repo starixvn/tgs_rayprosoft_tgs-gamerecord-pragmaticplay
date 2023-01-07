@@ -60,8 +60,8 @@ internal class ScheduleDispatchService : ICommandService<ScheduleDispatchCommand
 
                     var startTime = gameDataType switch
                     {
-                        PragmaticPlayTransferGameDataType.VirtualSports => config.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinute),
-                        PragmaticPlayTransferGameDataType.LiveDealer => config.NextTime.AddMinutes(-_gameRecordInfoOptions.LiveDealerIntervalMinute),
+                        PragmaticPlayTransferGameDataType.VirtualSports => config.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinutes),
+                        PragmaticPlayTransferGameDataType.LiveDealer => config.NextTime.AddMinutes(-_gameRecordInfoOptions.LiveDealerIntervalMinutes),
                         _ => config.NextTime
                     };
 

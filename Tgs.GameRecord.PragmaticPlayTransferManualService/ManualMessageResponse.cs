@@ -1,4 +1,4 @@
-﻿namespace Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
+﻿namespace Tgs.GameRecord.PragmaticPlayTransferManualService;
 
 public record ManualMessageResponse(
     bool Success = false,

@@ -2,15 +2,14 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using MongoDB.Messaging;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameRecord.PragmaticPlayTransferService;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core;
-using Tgs.GameRecord.PragmaticPlayTransferService.MessageHandler;
 using Tgs.MessageQueue.MongoDB.Configuration;
+using MongoMessageQueue = MongoDB.Messaging.MessageQueue;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,80 +47,75 @@ builder.Services
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    var xmlFileNames = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.xml");
-    foreach (var xmlFileName in xmlFileNames)
-    {
-        c.IncludeXmlComments(xmlFileName);
-    }
-});
+builder.Services.AddSwaggerGen();
 
-builder.Services
-    .AddMemoryCache();
-
-builder.Services
-    .AddGameRecordAwcService((options, sp) =>
+builder.Services.AddGameRecordCore(
+    (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
         options.ConnectionString = configuration.GetConnectionString("Redis")!;
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        configuration.GetSection("GameRecordInfo").Bind(options);
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        configuration.GetSection("MongoSetting").Bind(options);
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRecordSchedulesBaseUrl");
     });
 
-builder.Services
-    .AddGameRecordServiceCore(
-        (options, sp) =>
-        {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            configuration.GetSection("GameRecordInfo").Bind(options);
-        },
-        (options, sp) =>
-        {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
-        },
-        (options, sp) =>
-        {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
-        },
-        (options, sp) =>
-        {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRecordSchedulesBaseUrl");
-        },
-        (sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
-
-var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>();
+var mongoSetting = builder.Configuration.GetSection("MongoSetting").Get<MongoSettingOptions>();
+var natsSetting = builder.Configuration.GetSection("NatsSetting").Get<NatsSettingOptions>();
 
 builder.Services
     .AddMessageQueue()
-    .AddNatsMessageQueue(natsConfig =>
-    {
-        _ = natsConfig
-            .ConfigQueueOptions((options, sp) =>
-            {
-                var configuration = sp.GetRequiredService<IConfiguration>();
-                options.Url = configuration.GetConnectionString("Nats")!;
-            })
-            .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.pptf", "gp.gamerecord.schedule");
-    })
     .AddMongoMessageQueue(config =>
     {
         _ = config
-            .DefineMessageQueue(
-                gameRecordInfo.MongoDefine,
-                sp => new MongoMessageQueueBuilderOptions
-                {
-                    ConnectionString =
-                        sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging")!,
-                    MessageQueue = MessageQueue.Default
-                });
+        .DefineMessageQueue(
+            mongoSetting.ManagerName,
+            sp => new MongoMessageQueueBuilderOptions
+            {
+                MessageQueue = MongoMessageQueue.Default,
+                ConnectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging")!
+            });
     })
-    .ClearAllExchanges()
-    .AddMongoGlobPatternExchange(gameRecordInfo.MongoGlobPattern, gameRecordInfo.MongoDefine, gameRecordInfo.MongoGlobPattern);
+     .AddNatsMessageQueue(natsConfig =>
+     {
+         _ = natsConfig
+         .ConfigQueueOptions((options, sp) =>
+         {
+             var configuration = sp.GetRequiredService<IConfiguration>();
+             options.Url = configuration.GetConnectionString("Nats")!;
+         })
+         .AddHandler<ScheduleMessageHandler>(
+             subject: natsSetting.Subject,
+             group: natsSetting.Group);
+     })
+     .ClearAllExchanges()
+     .AddMongoGlobPatternExchange(
+        glob: mongoSetting.GlobPattern,
+        managerName: mongoSetting.ManagerName,
+        queueName: mongoSetting.QueueName);
 
 builder.Services
     .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
@@ -161,18 +155,21 @@ builder.Services
         };
     });
 
-builder.Services.AddHealthChecks();
+builder.Services
+    .AddHealthChecks();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.MapControllers();
+_ = app.UseSwagger();
+_ = app.UseSwaggerUI();
+
+_ = app.UseAuthorization();
+
+_ = app.MapControllers();
+
 app.MapProfileViewer();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.UseHealthChecks("/healthz");
+app.MapHealthChecks("/healthz");
 
 _ = app.UseGameRecordRegister();
 

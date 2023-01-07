@@ -22,9 +22,9 @@ internal class GameRecordScheduleService : IGameRecordScheduleService
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _gameRecordInfo = options.Value;
-        _intervalMinute = (_gameRecordInfo.IntervalMinute > _gameRecordInfo.MaxIntervalMinute)
-            ? _gameRecordInfo.MaxIntervalMinute :
-            _gameRecordInfo.IntervalMinute;
+        _intervalMinute = (_gameRecordInfo.IntervalMinutes > _gameRecordInfo.IntervalMinutesMax)
+            ? _gameRecordInfo.IntervalMinutesMax :
+            _gameRecordInfo.IntervalMinutes;
     }
 
     public ValueTask<GameRecordScheduleReply?> GetAsync(

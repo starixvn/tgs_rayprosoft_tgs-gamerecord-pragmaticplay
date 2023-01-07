@@ -12,18 +12,22 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
     private readonly GameRecordInfoOptions _gameRecordInfo;
     private readonly ILogger<GameRoundGetService> _logger;
     private readonly IMessageSender _messageSender;
+    private readonly MongoSettingOptions _mongoSetting;
     private readonly IUtensil _utensil;
 
     public GameRoundGetService(
-        IUtensil utensil,
+        ILogger<GameRoundGetService> logger,
+        IOptions<GameRecordInfoOptions> gameRecordInfoOptions,
+        IOptions<MongoSettingOptions> mongoSettingOptions,
         IMessageSender messageSender,
-        IOptions<GameRecordInfoOptions> options,
-        ILogger<GameRoundGetService> logger)
+        IUtensil utensil
+       )
     {
+        _gameRecordInfo = gameRecordInfoOptions.Value;
+        _mongoSetting = mongoSettingOptions.Value;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _gameRecordInfo = options.Value;
     }
 
     public async ValueTask<bool> GetAsync(
@@ -54,7 +58,7 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
         if (playerModel != null)
         {
             gameProviderConfigurationId = await _utensil
-                .GetBrandGetGameProviderConfigurationIdAsync(
+                .GetBrandGameProviderConfigurationIdAsync(
                     playerModel.BrandId,
                     gameProviderId,
                     cancellationToken)
@@ -66,13 +70,11 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
             }
         }
 
-        var sysDateTimeOffset = DateTimeOffset.UtcNow;
-
-        var messageRequest = new GameRecordMessage(
+        var message = new GameRecordMessage(
 
             ExternalRoundId: query.ExternalRoundId,
             GameProviderId: query.GameProviderId,
-            GameProviderCode: query.GameProviderCode,
+            GameProviderCode: _gameRecordInfo.GameProviderCode,
             GameId: gameId ?? -1,
             ExternalGameId: query.ExternalGameId,
             PlayerCode: playerModel == null ? string.Empty : playerModel.PlayerCode,
@@ -94,14 +96,16 @@ internal class GameRoundGetService : IGetService<GameRoundQuery, bool>
             Success: success
             );
 
-        _logger.LogInformation("LogOn:{logOn}  Subject:{subject} MessageRequest:{request}", DateTime.Now.ToString("o"), _gameRecordInfo.MongoGlobPattern, messageRequest);
+        _logger.LogInformation("LogOn:{logOn}  Subject:{subject} MessageRequest:{message}",
+            DateTime.Now.ToString("o"),
+            _mongoSetting.GlobPattern,
+            message);
 
         await _messageSender
             .PublishAsync(
-                _gameRecordInfo.MongoGlobPattern,
-                messageRequest.ToBson(),
-                cancellationToken:
-                cancellationToken)
+                subject: _mongoSetting.GlobPattern,
+                data: message.ToBson(),
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         return success;

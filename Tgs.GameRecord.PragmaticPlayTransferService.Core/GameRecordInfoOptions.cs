@@ -2,13 +2,13 @@
 
 public record GameRecordInfoOptions
 {
-    public string MongoDefine { get; init; } = default!;
-    public string MongoGlobPattern { get; init; } = default!;
     public string GameProviderCode { get; set; } = default!;
     public string GameProviderConfiguration { get; set; } = default!;
-    public double MaxIntervalMinute { get; set; } = 10d;
-    public double IntervalMinute { get; set; } = 10d;
-    public double LockMinute { get; set; } = 8.5d;
-    public double VirtualSportsIntervalMinute { get; set; } = 10d;
-    public double LiveDealerIntervalMinute { get; set; } = 1d;
+    public double IntervalMinutes { get; set; } = 5d;
+    public double IntervalMinutesMax { get; set; } = 10d;
+    public double IntervalMinutesMinimum { get; set; } = 1d;
+    public double VirtualSportsIntervalMinutes { get; set; } = 10d;
+    public double LiveDealerIntervalMinutes { get; set; } = 1d;
+    public double LockMinute { get; set; } = 8d;
+
 }

@@ -4,7 +4,7 @@ using Tgs.GameRecord.PragmaticPlayTransferService.Core.DispatchServices;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.PragmaticPlayTransferManualService.MessageHandler;
+namespace Tgs.GameRecord.PragmaticPlayTransferService;
 
 public class ScheduleMessageHandler : IMessageHandler
 {

@@ -7,21 +7,20 @@ metadata:
 data:
   appsettings.json: |
     {
+      "GameRecordInfo": {
+        "GameProviderCode": "PPTF",
+        "GameProviderConfiguration": "PPTFConfiguration",
+        "IntervalMinutes": 1,
+        "IntervalMinutesMax": 10,
+        "IntervalMinutesMinimum": 1,
+        "VirtualSportsIntervalMinutes": 10,
+        "LiveDealerIntervalMinutes": 1,
+        "LockMinute": 8
+      },
       "GameRecord": {
         "GameProvidersBaseUrl": "http://game-gameproviders",
         "GameCommandClientBaseUrl": "http://game-gamecommand",
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
-      },
-      "GameRecordInfo": {
-        "MongoDefine": "gp.gamerecord.database",
-        "MongoGlobPattern": "tgs.gp.gamerecord.database.round.pptf",
-        "GameProviderCode": "PPTF",
-        "GameProviderConfiguration": "PPTFConfiguration",
-        "MaxIntervalMinute": 10,
-        "IntervalMinute": 10,
-        "LockMinute": 8.5,
-        "VirtualSportsIntervalMinute": 10,
-        "LiveDealerIntervalMinute": 1
       }
     }
   monitor.settings.json: |

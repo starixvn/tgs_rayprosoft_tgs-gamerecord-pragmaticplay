@@ -4,7 +4,7 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Core;
 
 public interface IUtensil
 {
-    ValueTask<Guid?> GetBrandGetGameProviderConfigurationIdAsync(
+    ValueTask<Guid?> GetBrandGameProviderConfigurationIdAsync(
         Guid brandId,
         Guid gameProviderId,
         CancellationToken cancellationToken = default);

@@ -2,7 +2,6 @@
 
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
-using StackExchange.Redis;
 using Tgs.GameCommand.Client;
 using Tgs.GameProviders.Client;
 using Tgs.GameRecord.PragmaticPlayTransferService.Core;
@@ -12,16 +11,23 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddGameRecordServiceCore(
+    public static IServiceCollection AddGameRecordCore(
         this IServiceCollection services,
-        Action<GameRecordInfoOptions, IServiceProvider> configure,
+        Action<RedisOptions, IServiceProvider> redisDBconfigure,
+        Action<GameRecordInfoOptions, IServiceProvider> gameRecordInfoOptions,
+        Action<MongoSettingOptions, IServiceProvider> mongoSettingOptions,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
         Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
-        Action<GameRecordSchedulesClientOptions, IServiceProvider> gameRecordSchedulesClientOptions,
-        Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+        Action<GameRecordSchedulesClientOptions, IServiceProvider> gameRecordSchedulesClientOptions)
         => services
+            .AddOptions<RedisOptions>()
+            .Configure(redisDBconfigure)
+            .Services
             .AddOptions<GameRecordInfoOptions>()
-            .Configure(configure)
+            .Configure(gameRecordInfoOptions)
+            .Services
+            .AddOptions<MongoSettingOptions>()
+            .Configure(mongoSettingOptions)
             .Services
             .RegisterAllServiceUtilityTypes(
                 Assembly.GetExecutingAssembly(),
@@ -29,10 +35,10 @@ public static class ServiceCollectionExtensions
             .AddGameProvidersClient(gameProvidersClientOptions)
             .AddGameCommandClient(gameCommandClientOptions)
             .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
+            .AddMemoryCache()
+            .AddSingleton<RedisConnectionManager>()
             .AddSingleton<ISystemClock, SystemClock>()
             .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
-            .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, redisDatabaseResolver(sp)))
-            .AddTransient<IUtensil, UtensilRepository>()
-            .Decorate<IUtensil>((inner, sp) =>
-                ActivatorUtilities.CreateInstance<UtensilMemoryCachedRepository>(sp, inner));
+            .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, sp.GetRequiredService<RedisConnectionManager>().Database))
+            .AddTransient<IUtensil>(sp => ActivatorUtilities.CreateInstance<UtensilRepository>(sp, TimeSpan.FromHours(1)));
 }
