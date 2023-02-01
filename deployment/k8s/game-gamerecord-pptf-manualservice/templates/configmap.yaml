@@ -18,9 +18,9 @@ data:
         "LockMinute": 8
       },
       "GameRecord": {
-        "GameProvidersBaseUrl": "http://game-gameproviders",
-        "GameCommandClientBaseUrl": "http://game-gamecommand",
-        "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules"
+        "GameProvidersBaseUrl": "http://game-gameproviders/",
+        "GameCommandClientBaseUrl": "http://game-gamecommand/",
+        "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules:9090/"
       }
     }
   monitor.settings.json: |
