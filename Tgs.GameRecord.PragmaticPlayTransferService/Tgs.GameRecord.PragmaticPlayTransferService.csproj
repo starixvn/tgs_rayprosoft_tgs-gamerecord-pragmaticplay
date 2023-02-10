@@ -16,8 +16,8 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.3" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.3" />
 		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-		<PackageReference Include="Tgs.GameProviders.Client" Version="0.0.50" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="Tgs.GameProviders.Client" Version="0.0.53" />
 		<PackageReference Include="Tgs.MessageQueue" Version="2.1.1" />
 		<PackageReference Include="Tgs.MessageQueue.MongoDB" Version="2.1.2" />
 		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.7" />
