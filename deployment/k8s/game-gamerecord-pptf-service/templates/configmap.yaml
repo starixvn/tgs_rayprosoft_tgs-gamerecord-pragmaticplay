@@ -7,6 +7,11 @@ metadata:
 data:
   appsettings.json: |
     {
+      "Logging": {
+         "LogLevel": {
+          "Default": "Warning"
+          }
+      },
       "GameRecordInfo": {
         "GameProviderCode": "PPTF",
         "GameProviderConfiguration": "PPTFConfiguration",
