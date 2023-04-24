@@ -1,23 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageReference Include="MongoDB.Bson" Version="2.19.0" />
-    <PackageReference Include="Scrutor" Version="4.2.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.90" />
-    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="Tgs.GameCommand.Client" Version="0.0.6" />
-    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.53" />
-    <PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.7" />
-    <PackageReference Include="Tgs.GameRounds.Client" Version="0.0.35" />
-    <PackageReference Include="Tgs.MessageQueue" Version="2.1.1" />
-    <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Scrutor" Version="4.2.2" />
+		<PackageReference Include="StackExchange.Redis" Version="2.6.104" />
+		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
+		<PackageReference Include="Tgs.GameCommand.Client" Version="0.0.7" />
+		<PackageReference Include="Tgs.GameInterface.PragmaticPlay.Client" Version="0.0.3" />
+		<PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.7" />
+		<PackageReference Include="Tgs.GameRounds.Schedule.Client" Version="0.0.26" />
+		<PackageReference Include="Tgs.GameRounds.Work.Client" Version="0.0.4" />
+		<PackageReference Include="Tgs.GameRounds.Work.Manual.Client" Version="0.0.3" />
+		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.0" />
+		<PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
+		<PackageReference Include="Tgs.MessageQueue" Version="2.3.0" />
+	</ItemGroup>
 
 </Project>

@@ -8,9 +8,9 @@ data:
   appsettings.json: |
     {
       "Logging": {
-         "LogLevel": {
+        "LogLevel": {
           "Default": "Warning"
-          }
+        }
       },
       "GameRecordInfo": {
         "GameProviderCode": "PPTF",
@@ -23,25 +23,42 @@ data:
         "LockMinute": 8
       },
       "GameRecord": {
-        "GameProvidersBaseUrl": "http://game-gameproviders/",
         "GameCommandClientBaseUrl": "http://game-gamecommand/",
+        "GameRoundsScheduleClientBaseUrl": "http://game-gamerounds-schedule:9090/",
+        "GameInterfaceClientBaseUrl": "http://game-gameinterface-pp:9090/",
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules:9090/"
       }
     }
-  monitor.settings.json: |
-    {
-      "Metrics": {
-        "MetricCount": "1"
-      },
-      "Logging":{
-        "Console": {
-          "FormatterName": "json"
-        },
-        "LogLevel": {
-          "Default": "Warning",
-          "Microsoft": "Warning",
-          "Microsoft.Diagnostics": "Warning",
-          "Microsoft.Hosting.Lifetime": "Information"
-        }
-      }
-    }
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: "$NODE_IP:4317"
+        tls:
+          insecure: true
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: "tgs"
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces: 
+          receivers: [otlp]
+          processors:
+            - batch
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          exporters: [prometheus]
