@@ -78,6 +78,9 @@ internal class UtensilRepository : IUtensil
         return gameId;
     }
 
+    public string GetGameProviderCode()
+    => _gameRecordInfo.GameProviderCode;
+
     public async ValueTask<Guid> GetGameProviderIdAsync(
         CancellationToken cancellationToken = default)
     {

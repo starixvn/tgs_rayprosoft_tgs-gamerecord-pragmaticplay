@@ -2,6 +2,5 @@
 
 public record ScheduleConfig
 {
-    public DateTimeOffset LastGameRecordTime { get; set; }
     public DateTimeOffset NextTime { get; set; }
 }

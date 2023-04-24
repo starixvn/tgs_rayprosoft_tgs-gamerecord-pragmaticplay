@@ -51,7 +51,7 @@ app: {{ include "game-gamerecord-pptf-service.name" . }}
 tgs.kind: game
 tgs.game.kind: gamerecord
 tgs.gamerecord.kind: service
-tgs.gameprovider.kind: pptf
+tgs.gameprovider.kind: pp
 {{- end }}
 
 {{/*
