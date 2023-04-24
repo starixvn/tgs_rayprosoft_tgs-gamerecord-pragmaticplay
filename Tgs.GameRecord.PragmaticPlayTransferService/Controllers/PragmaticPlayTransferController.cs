@@ -6,7 +6,7 @@ namespace Tgs.GameRecord.PragmaticPlayTransferService.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class DreamGameController : ControllerBase
+public class PragmaticPlayTransferController : ControllerBase
 {
     [HttpPost("manual")]
     public ValueTask GameRecordAsync(
