@@ -119,7 +119,7 @@ internal class SchedulePullRecordCommandService : ICommandService<SchedulePullRe
                 var gameRecords = result.Items
                     ?? Enumerable.Empty<GameRecordData>();
 
-                if (nextTime == DateTimeOffset.UnixEpoch || !gameRecords.Any())
+                if (nextTime == DateTimeOffset.UnixEpoch)
                 {
                     break;
                 }
