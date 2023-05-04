@@ -84,7 +84,8 @@ internal class SchedulePullRecordCommandService : ICommandService<SchedulePullRe
 
             var nextTime = startTime;
             var currentTime = _systemClock.CurrentTime;
-            while (nextTime < currentTime && nextTime < currentTime && currentTime.Subtract(nextTime).TotalSeconds > 30)
+
+            while (_utensil.IsRun(nextTime, currentTime))
             {
                 var result = command.DataType.ToUpper() switch
                 {
@@ -114,8 +115,6 @@ internal class SchedulePullRecordCommandService : ICommandService<SchedulePullRe
                     .ConfigureAwait(false)
                 };
 
-
-
                 var gameRecords = result.Items
                     ?? Enumerable.Empty<GameRecordData>();
 
@@ -126,6 +125,13 @@ internal class SchedulePullRecordCommandService : ICommandService<SchedulePullRe
                 else
                 {
                     nextTime = result.NextTime.ToDateTimeOffset();
+                }
+
+                _logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), currentTime.ToString("O"), _utensil.IsRun(nextTime, currentTime));
+
+                if (!gameRecords.Any())
+                {
+                    continue;
                 }
 
                 foreach (var gameRecord in gameRecords)

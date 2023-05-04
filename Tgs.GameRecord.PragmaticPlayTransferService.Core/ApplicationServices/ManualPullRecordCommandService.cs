@@ -11,15 +11,18 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
     private readonly IGameRecordUtensil _gameRecordUtensil;
     private readonly ILogger<ManualPullRecordCommandService> _logger;
     private readonly ICommandService<ManualHandleRecordCommand> _service;
+    private readonly IUtensil _utensil;
 
     public ManualPullRecordCommandService(
         ILogger<ManualPullRecordCommandService> logger,
         IGameInterfacePragmaticPlayClient client,
+        IUtensil utensil,
         IGameRecordUtensil gameRecordUtensil,
         ICommandService<ManualHandleRecordCommand> service)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _client = client ?? throw new ArgumentNullException(nameof(client));
+        _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         _gameRecordUtensil = gameRecordUtensil ?? throw new ArgumentNullException(nameof(gameRecordUtensil));
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
@@ -29,7 +32,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
         var nextTime = command.StartTime;
         var endTime = command.EndTime;
 
-        while (nextTime < endTime && endTime.Subtract(nextTime).TotalSeconds > 30)
+        while (_utensil.IsRun(nextTime, endTime))
         {
             var result = command.DataType.ToUpper() switch
             {
@@ -59,18 +62,23 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
                 .ConfigureAwait(false)
             };
 
-            nextTime = result.NextTime.ToDateTimeOffset();
+            if (result.NextTime.ToDateTimeOffset() == DateTimeOffset.UnixEpoch)
+            {
+                break;
+            }
+            else
+            {
+                nextTime = result.NextTime.ToDateTimeOffset();
+            }
 
-            _logger.LogWarning("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime}", command.DataType.ToUpper(), nextTime.ToString("O"), endTime.ToString("O"));
-
-            _logger.LogWarning("DataType:{dataType} | while{isRun}", command.DataType.ToUpper(), nextTime < endTime && endTime.Subtract(nextTime).TotalSeconds > 30);
+            _logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), endTime.ToString("O"), _utensil.IsRun(nextTime, endTime));
 
             var gameRecords = result.Items
                 ?? Enumerable.Empty<GameRecordData>();
 
-            if (nextTime == DateTimeOffset.UnixEpoch || !gameRecords.Any())
+            if (!gameRecords.Any())
             {
-                break;
+                continue;
             }
 
             foreach (var gameRecord in gameRecords)

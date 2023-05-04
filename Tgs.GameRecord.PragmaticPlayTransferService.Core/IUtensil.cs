@@ -22,4 +22,6 @@ public interface IUtensil
     ValueTask<PlayerInfo?> GetPlayerAsync(
         string playerCode,
         CancellationToken cancellationToken = default);
+
+    bool IsRun(DateTimeOffset nextTime, DateTimeOffset endTime);
 }

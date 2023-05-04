@@ -123,4 +123,7 @@ internal class UtensilRepository : IUtensil
         }
         return playerModel;
     }
+
+    public bool IsRun(DateTimeOffset nextTime, DateTimeOffset endTime)
+         => nextTime < endTime && endTime.Subtract(nextTime).TotalSeconds > 30;
 }

@@ -289,4 +289,68 @@ public class UtensilRepositoryUnitTest
                 key: key,
                 player);
     }
+
+    [Fact]
+    public void Is_Rund_False()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "PPTF",
+            GameProviderConfiguration = "PPTFConfiguration",
+            IntervalMinutes = 1,
+            IntervalMinutesMax = 10,
+            IntervalMinutesMinimum = 1,
+            VirtualSportsIntervalMinutes = 10,
+            LiveDealerIntervalMinutes = 1,
+            LockMinute = 8
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var nextTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
+        var endTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
+
+        var actual = repository.IsRun(nextTime, endTime);
+
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void Is_Rund_True()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "PPTF",
+            GameProviderConfiguration = "PPTFConfiguration",
+            IntervalMinutes = 1,
+            IntervalMinutesMax = 10,
+            IntervalMinutesMinimum = 1,
+            VirtualSportsIntervalMinutes = 10,
+            LiveDealerIntervalMinutes = 1,
+            LockMinute = 8
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var nextTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
+        var endTime = DateTime.Parse("2023-04-29T15:00:31+00:00");
+
+        var actual = repository.IsRun(nextTime, endTime);
+
+        Assert.True(actual);
+    }
 }

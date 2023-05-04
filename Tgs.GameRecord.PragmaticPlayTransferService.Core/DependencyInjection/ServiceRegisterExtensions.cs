@@ -12,7 +12,7 @@ public static class ServiceRegisterExtensions
     {
         using (var scope = app.Services.CreateScope())
         {
-            var gameRecordInfo = app.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>();
+            var gameRecordInfo = app.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>()!;
             var utensil = scope.ServiceProvider.GetRequiredService<IUtensil>();
             var gameProviderId = await utensil.GetGameProviderIdAsync().ConfigureAwait(false);
 
