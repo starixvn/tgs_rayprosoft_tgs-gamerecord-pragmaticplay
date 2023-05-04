@@ -12,17 +12,20 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
     private readonly ILogger<ManualPullRecordCommandService> _logger;
     private readonly ICommandService<ManualHandleRecordCommand> _service;
     private readonly IUtensil _utensil;
+    private readonly ISystemClock _systemClock;
 
     public ManualPullRecordCommandService(
         ILogger<ManualPullRecordCommandService> logger,
         IGameInterfacePragmaticPlayClient client,
         IUtensil utensil,
+        ISystemClock systemClock,
         IGameRecordUtensil gameRecordUtensil,
         ICommandService<ManualHandleRecordCommand> service)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
+        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _gameRecordUtensil = gameRecordUtensil ?? throw new ArgumentNullException(nameof(gameRecordUtensil));
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
@@ -31,8 +34,9 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
     {
         var nextTime = command.StartTime;
         var endTime = command.EndTime;
+        var currentTime = _systemClock.CurrentTime;
 
-        while (_utensil.IsRun(nextTime, endTime))
+        while (_utensil.IsRun(nextTime, endTime, currentTime))
         {
             var result = command.DataType.ToUpper() switch
             {
@@ -71,7 +75,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
                 nextTime = result.NextTime.ToDateTimeOffset();
             }
 
-            _logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), endTime.ToString("O"), _utensil.IsRun(nextTime, endTime));
+            _logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | currentTime:{currentTime}| while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), currentTime.ToString("O"), currentTime.ToString("O"), _utensil.IsRun(nextTime, currentTime, currentTime));
 
             var gameRecords = result.Items
                 ?? Enumerable.Empty<GameRecordData>();

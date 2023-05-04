@@ -291,7 +291,7 @@ public class UtensilRepositoryUnitTest
     }
 
     [Fact]
-    public void Is_Rund_False()
+    public void Is_Rund_Greater_Than_End_Time()
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
         {
@@ -316,8 +316,9 @@ public class UtensilRepositoryUnitTest
 
         var nextTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
         var endTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
+        var currentTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
 
-        var actual = repository.IsRun(nextTime, endTime);
+        var actual = repository.IsRun(nextTime, endTime, currentTime);
 
         Assert.False(actual);
     }
@@ -348,9 +349,41 @@ public class UtensilRepositoryUnitTest
 
         var nextTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
         var endTime = DateTime.Parse("2023-04-29T15:00:31+00:00");
-
-        var actual = repository.IsRun(nextTime, endTime);
+        var currentTime = DateTime.Parse("2023-04-29T15:01:00+00:00");
+        var actual = repository.IsRun(nextTime, endTime, currentTime);
 
         Assert.True(actual);
+    }
+
+    [Fact]
+    public void Is_Rund_Greater_Than_Current_Time()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "PPTF",
+            GameProviderConfiguration = "PPTFConfiguration",
+            IntervalMinutes = 1,
+            IntervalMinutesMax = 10,
+            IntervalMinutesMinimum = 1,
+            VirtualSportsIntervalMinutes = 10,
+            LiveDealerIntervalMinutes = 1,
+            LockMinute = 8
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var nextTime = DateTime.Parse("2023-04-29T15:15:00+00:00");
+        var endTime = DateTime.Parse("2023-04-29T15:01:00+00:00");
+        var currentTime = DateTime.Parse("2023-04-29T15:00:30+00:00");
+        var actual = repository.IsRun(nextTime, endTime, currentTime);
+
+        Assert.False(actual);
     }
 }

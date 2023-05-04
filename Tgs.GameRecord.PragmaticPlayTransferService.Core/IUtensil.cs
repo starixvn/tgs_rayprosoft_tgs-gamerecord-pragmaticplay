@@ -23,5 +23,5 @@ public interface IUtensil
         string playerCode,
         CancellationToken cancellationToken = default);
 
-    bool IsRun(DateTimeOffset nextTime, DateTimeOffset endTime);
+    bool IsRun(DateTimeOffset nextTime, DateTimeOffset endTime, DateTimeOffset currentTime);
 }
