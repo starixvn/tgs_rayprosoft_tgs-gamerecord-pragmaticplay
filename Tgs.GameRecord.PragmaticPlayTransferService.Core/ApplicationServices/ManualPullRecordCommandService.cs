@@ -29,7 +29,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
         var nextTime = command.StartTime;
         var endTime = command.EndTime;
 
-        while (nextTime < endTime && nextTime < endTime && endTime.Subtract(nextTime).TotalSeconds > 30)
+        while (nextTime < endTime && endTime.Subtract(nextTime).TotalSeconds > 30)
         {
             var result = command.DataType.ToUpper() switch
             {
@@ -60,6 +60,10 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
             };
 
             nextTime = result.NextTime.ToDateTimeOffset();
+
+            _logger.LogWarning("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime}", command.DataType.ToUpper(), nextTime.ToString("O"), endTime.ToString("O"));
+
+            _logger.LogWarning("DataType:{dataType} | while{isRun}", command.DataType.ToUpper(), nextTime < endTime && endTime.Subtract(nextTime).TotalSeconds > 30);
 
             var gameRecords = result.Items
                 ?? Enumerable.Empty<GameRecordData>();
