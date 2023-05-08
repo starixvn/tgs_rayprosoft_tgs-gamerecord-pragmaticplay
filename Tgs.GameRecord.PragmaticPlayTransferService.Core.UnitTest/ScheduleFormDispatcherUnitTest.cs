@@ -125,7 +125,7 @@ public class ScheduleFormDispatcherUnitTest
         var gameProviderCode = "PPTF";
         var id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-        var parameter = new PragmaticPlayManuaParameter
+        var parameter = new PragmaticPlayManualParameter
         {
             ApiUrl = "http://localhost/",
             SecureLogin = "secureLogin",

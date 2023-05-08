@@ -91,7 +91,7 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
             }
             else
             {
-                var parameter = JsonSerializer.Deserialize<PragmaticPlayManuaParameter>(scheduleForm.Parameters)
+                var parameter = JsonSerializer.Deserialize<PragmaticPlayManualParameter>(scheduleForm.Parameters)
                     ?? throw new Exception($"This game provider ({gameProviderCode}) scheduling form parameter is null. ({id})");
 
                 var command = new ManualPullRecordCommand(

@@ -28,7 +28,7 @@ public class PragmaticPlayTransferController : ControllerBase
     ///             "startTime": "2023-04-29T15:00:00+08:00",
     ///             "endTime": "2023-04-29T16:00:08+00:00"
     ///         }
-    ///         
+    ///
     ///         RNG Example
     ///         {
     ///             "apiUrl": "https://api.prerelease-env.biz/",
@@ -38,7 +38,7 @@ public class PragmaticPlayTransferController : ControllerBase
     ///             "startTime": "2023-04-29T15:00:00+08:00",
     ///             "endTime": "2023-04-29T16:00:08+00:00"
     ///         }
-    ///         
+    ///
     ///         VSB Example
     ///         {
     ///             "apiUrl": "https://api.prerelease-env.biz/",
@@ -76,7 +76,7 @@ public class PragmaticPlayTransferController : ControllerBase
     ///             "secretKey": "testKey",
     ///             "dataType": "LC"
     ///         }
-    ///         
+    ///
     ///         RNG Example
     ///         {
     ///             "apiUrl": "https://api.prerelease-env.biz/",
@@ -84,7 +84,7 @@ public class PragmaticPlayTransferController : ControllerBase
     ///             "secretKey": "testKey",
     ///             "dataType": "RNG"
     ///         }
-    ///         
+    ///
     ///         VSB Example
     ///         {
     ///             "apiUrl": "https://api.prerelease-env.biz/",

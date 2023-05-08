@@ -11,8 +11,8 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
     private readonly IGameRecordUtensil _gameRecordUtensil;
     private readonly ILogger<ManualPullRecordCommandService> _logger;
     private readonly ICommandService<ManualHandleRecordCommand> _service;
-    private readonly IUtensil _utensil;
     private readonly ISystemClock _systemClock;
+    private readonly IUtensil _utensil;
 
     public ManualPullRecordCommandService(
         ILogger<ManualPullRecordCommandService> logger,
