@@ -7,11 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.PragmaticPla
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.PragmaticPlayTransferService", "Tgs.GameRecord.PragmaticPlayTransferService\Tgs.GameRecord.PragmaticPlayTransferService.csproj", "{A2EA295D-DDCF-4316-873D-80D6BE2ED46E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CFEFB0D4-C072-42D4-A029-30A25A3AC514}"
-	ProjectSection(SolutionItems) = preProject
-		nuget.config = nuget.config
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameRecord.PragmaticPlayTransferService.Core.UnitTest", "Tgs.GameRecord.PragmaticPlayTransferService.Core.UnitTest\Tgs.GameRecord.PragmaticPlayTransferService.Core.UnitTest.csproj", "{F37D768F-5D1B-4538-A001-5B814553CC5D}"
 EndProject
 Global
