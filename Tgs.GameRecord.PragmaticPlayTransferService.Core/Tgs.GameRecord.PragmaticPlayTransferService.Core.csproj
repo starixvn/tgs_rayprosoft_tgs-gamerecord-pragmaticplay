@@ -15,7 +15,7 @@
 		<PackageReference Include="Tgs.GameInterface.PragmaticPlay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.7" />
 		<PackageReference Include="Tgs.GameRounds.Schedule.Client" Version="0.0.33" />
-		<PackageReference Include="Tgs.GameRounds.Work.Client" Version="0.0.4" />
+		<PackageReference Include="Tgs.GameRounds.Work.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.GameRounds.Work.Manual.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.0" />
 		<PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
