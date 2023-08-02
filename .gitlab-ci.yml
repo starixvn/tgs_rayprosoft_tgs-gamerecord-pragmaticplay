@@ -1,8 +1,8 @@
 variables:
-  ImageName: pgtgs/game-gamerecord-pptf-service
-  SettingKey: game-gamerecord-pptf-service
-  HelmTemplateFolderName: game-gamerecord-pptf-service
-  BuildCacheKey: Tgs.GameRecord.PragmaticPlayTransferService.$CI_PIPELINE_ID
+  ImageName: pgtgs/game-gamerecord-pp
+  SettingKey: game-gamerecord-pp
+  HelmTemplateFolderName: game-gamerecord-pp
+  BuildCacheKey: Tgs.GameRecord.PragmaticPlay.$CI_PIPELINE_ID
 
 default:
   before_script:
@@ -59,7 +59,7 @@ push-docker-image:
     untracked: true   
     policy: pull
   script:
-    - dotnet build "Tgs.GameRecord.PragmaticPlayTransferService/Tgs.GameRecord.PragmaticPlayTransferService.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
+    - dotnet build "Tgs.GameRecord.PragmaticPlay/Tgs.GameRecord.PragmaticPlay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
     - docker push $ImageName:$Tag
 
 push-k8s-template:
