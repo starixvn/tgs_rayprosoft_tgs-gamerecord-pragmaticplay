@@ -1,6 +1,4 @@
-﻿// ReSharper disable CheckNamespace
-
-using System.Reflection;
+﻿using System.Reflection;
 using Tgs.GameCommand.Client;
 using Tgs.GameInterface.PragmaticPlay.Client;
 using Tgs.GameRecord.PragmaticPlay.Core;
@@ -35,13 +33,12 @@ public static class ServiceCollectionExtensions
         .AddGameRoundsScheduleClient(gameRoundsScheduleClientOptions)
         .AddGameInterfacePragmaticPlayClient(gameInterfacePragmaticPlayClientOptions)
         .AddGameRecordSchedulesClient(gameRecordSchedulesClientOptions)
-        .AddGameRoundsWorkClient()
+        .AddGameRecordHandleClient()
         .AddSingleton<IScheduleFormDispatcher, ScheduleFormDispatcher>()
         .AddSingleton<IScheduleFormLock>(sp => ActivatorUtilities.CreateInstance<ScheduleFormLock>(sp, sp.GetRequiredService<RedisConnectionManager>().Database))
         .AddSingleton<ISchedulePullRecordLock>(sp => ActivatorUtilities.CreateInstance<SchedulePullRecordLock>(sp, sp.GetRequiredService<RedisConnectionManager>().Database))
-        .AddTransient<IUtensil>(sp => ActivatorUtilities.CreateInstance<UtensilRepository>(sp, TimeSpan.FromHours(1)))
+        .AddSingleton<IUtensil, UtensilRepository>()
         .AddSingleton<ISystemClock, SystemClock>()
-        .AddSingleton<IGameRecordUtensil, GameRecordUtensil>()
         .AddTransient<IGameRecordScheduleService, GameRecordScheduleService>()
         .AddTransient<IHangfireUtensil, HangfireUtensil>();
 }

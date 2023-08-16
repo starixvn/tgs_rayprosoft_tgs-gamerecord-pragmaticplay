@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.4" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.5" />
 		<PackageReference Include="Hangfire.Console" Version="1.4.2" />
 		<PackageReference Include="Hangfire.Dashboard.Management" Version="1.7.9" />
 		<PackageReference Include="HangFire.Redis.StackExchange" Version="1.9.0" />
@@ -17,9 +17,9 @@
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 		<PackageReference Include="Tgs.GameCommand.Client" Version="0.0.8" />
 		<PackageReference Include="Tgs.GameInterface.PragmaticPlay.Client" Version="0.0.5" />
+		<PackageReference Include="Tgs.GameRecord.Handle.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.8" />
 		<PackageReference Include="Tgs.GameRounds.Schedule.Client" Version="0.0.33" />
-		<PackageReference Include="Tgs.GameRounds.Work.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.1" />
 		<PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
 		<PackageReference Include="Tgs.MessageQueue" Version="2.3.0" />

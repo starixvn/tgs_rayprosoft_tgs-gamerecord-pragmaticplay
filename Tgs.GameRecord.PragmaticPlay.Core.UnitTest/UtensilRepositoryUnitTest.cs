@@ -9,128 +9,6 @@ namespace Tgs.GameRecord.PragmaticPlay.Core.UnitTest;
 public class UtensilRepositoryUnitTest
 {
     [Fact]
-    public async Task Get_Brand_GameProvider_Configuration_Id()
-    {
-        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
-        {
-            GameProviderCode = "PPTF",
-            GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
-            IntervalMinutes = 1,
-            IntervalMinutesMax = 10,
-            IntervalMinutesMinimum = 1,
-            VirtualSportsIntervalMinutes = 10,
-            LiveDealerIntervalMinutes = 5,
-            LockMinute = 8
-        });
-        var fakeClient = Substitute.For<IGameCommandClient>();
-        var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-
-        var brandId = Guid.NewGuid();
-        var gameProviderId = Guid.NewGuid();
-
-        var key = $"gamerecord:{gameRecordInfo.Value.GameProviderCode}:{brandId}:{gameProviderId}";
-
-        _ = fakeMemoryCache
-            .TryGetValue(
-                key: Arg.Is(key),
-                value: out _)
-             .Returns(false);
-
-        var gameProviderConfigurationId = Guid.NewGuid();
-        _ = fakeClient
-            .BrandGetGameProviderConfigurationIdAsync(
-                brandId: Arg.Is(brandId),
-                gameProviderId: Arg.Is(gameProviderId),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(gameProviderConfigurationId);
-
-        var repository = new UtensilRepository(
-            gameRecordInfo,
-            fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
-
-        var actual = await repository
-            .GetBrandGameProviderConfigurationIdAsync(
-                brandId,
-                gameProviderId)
-            .ConfigureAwait(false);
-
-        Assert.True(actual.HasValue);
-        Assert.Equal(gameProviderConfigurationId, actual.Value);
-
-        _ = fakeMemoryCache
-            .Received(1)
-            .Set(
-                key: key,
-                gameProviderConfigurationId);
-    }
-
-    [Fact]
-    public async Task Get_Game_Id()
-    {
-        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
-        {
-            GameProviderCode = "PPTF",
-            GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
-            IntervalMinutes = 1,
-            IntervalMinutesMax = 10,
-            IntervalMinutesMinimum = 1,
-            VirtualSportsIntervalMinutes = 10,
-            LiveDealerIntervalMinutes = 5,
-            LockMinute = 8
-        });
-        var fakeClient = Substitute.For<IGameCommandClient>();
-        var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-
-        var gameProviderId = Guid.NewGuid();
-        var gameExternalId = "1";
-
-        var key = $"gamerecord:{gameRecordInfo.Value.GameProviderCode}:{gameProviderId}:{gameExternalId}";
-
-        _ = fakeMemoryCache
-            .TryGetValue(
-                key: Arg.Is(key),
-                value: out _)
-             .Returns(false);
-
-        var gameId = 1;
-        _ = fakeClient
-            .GameGetIdAsync(
-                gameProviderId: Arg.Is(gameProviderId),
-                gameExternalId: Arg.Is(gameExternalId),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(gameId);
-
-        var repository = new UtensilRepository(
-            gameRecordInfo,
-            fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
-
-        var actual = await repository
-            .GetGameIdAsync(
-                gameProviderId,
-                gameExternalId)
-            .ConfigureAwait(false);
-
-        Assert.True(actual.HasValue);
-        Assert.Equal(gameId, actual.Value);
-
-        _ = fakeMemoryCache
-            .Received(1)
-            .Set(
-                key: key,
-                gameId);
-    }
-
-    [Fact]
     public async Task Get_GameProvider_Id()
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
@@ -148,7 +26,6 @@ public class UtensilRepositoryUnitTest
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
 
         var key = $"gamerecord:{gameRecordInfo.Value.GameProviderCode}";
 
@@ -168,8 +45,7 @@ public class UtensilRepositoryUnitTest
         var repository = new UtensilRepository(
             gameRecordInfo,
             fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
+            fakeMemoryCache);
 
         var actual = await repository
             .GetGameProviderIdAsync()
@@ -184,119 +60,6 @@ public class UtensilRepositoryUnitTest
                 gameProviderId);
     }
 
-    [Fact]
-    public async Task Get_GameProvider_Id_Exception()
-    {
-        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
-        {
-            GameProviderCode = "PPTF",
-            GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
-            IntervalMinutes = 1,
-            IntervalMinutesMax = 10,
-            IntervalMinutesMinimum = 1,
-            VirtualSportsIntervalMinutes = 10,
-            LiveDealerIntervalMinutes = 5,
-            LockMinute = 8
-        });
-        var fakeClient = Substitute.For<IGameCommandClient>();
-        var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-
-        var key = $"{gameRecordInfo.Value.GameProviderCode}";
-
-        _ = fakeMemoryCache
-            .TryGetValue(
-                key: Arg.Is(key),
-                value: out _)
-             .Returns(false);
-
-        _ = fakeClient
-            .GameProviderGetGameProviderIdAsync(
-                gameProviderCode: Arg.Is(gameRecordInfo.Value.GameProviderCode),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(ValueTask.FromResult<Guid?>(null));
-
-        var repository = new UtensilRepository(
-            gameRecordInfo,
-            fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
-
-        _ = await Assert.ThrowsAsync<Exception>(() => repository
-             .GetGameProviderIdAsync()
-             .AsTask())
-             .ConfigureAwait(false);
-    }
-
-    [Fact]
-    public async Task Get_Player()
-    {
-        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
-        {
-            GameProviderCode = "PPTF",
-            GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
-            IntervalMinutes = 1,
-            IntervalMinutesMax = 10,
-            IntervalMinutesMinimum = 1,
-            VirtualSportsIntervalMinutes = 10,
-            LiveDealerIntervalMinutes = 5,
-            LockMinute = 8
-        });
-        var fakeClient = Substitute.For<IGameCommandClient>();
-        var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-
-        var playerCode = "test";
-
-        var key = $"gamerecord:{gameRecordInfo.Value.GameProviderCode}:{playerCode}";
-
-        _ = fakeMemoryCache
-            .TryGetValue(
-                key: Arg.Is(key),
-                value: out _)
-             .Returns(false);
-
-        var player = new PlayerInfo(
-            ResellerId: Guid.NewGuid(),
-            ResellerCode: "TGS",
-            LicenseeId: Guid.NewGuid(),
-            LicenseeCode: "TGS",
-            BrandId: Guid.NewGuid(),
-            BrandCode: "GPI",
-            PlayerCode: playerCode,
-            Username: playerCode,
-            DefaultWalletId: Guid.NewGuid(),
-            DefaultWalletCurrencyCode: "CNY");
-        _ = fakeClient
-            .PlayerGetAsync(
-                playerCode: Arg.Is(playerCode),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(player);
-
-        var repository = new UtensilRepository(
-            gameRecordInfo,
-            fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
-
-        var actual = await repository
-            .GetPlayerAsync(
-                playerCode: playerCode)
-            .ConfigureAwait(false);
-
-        Assert.NotNull(actual);
-        Assert.Equal(playerCode, player.PlayerCode);
-
-        _ = fakeMemoryCache
-            .Received(1)
-            .Set(
-                key: key,
-                player);
-    }
 
     [Fact]
     public void Is_Rund_Greater_Than_Current_Time()
@@ -316,13 +79,11 @@ public class UtensilRepositoryUnitTest
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
 
         var repository = new UtensilRepository(
             gameRecordInfo,
             fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
+            fakeMemoryCache);
 
         var nextTime = DateTime.Parse("2023-04-29T15:15:00+00:00");
         var endTime = DateTime.Parse("2023-04-29T15:01:00+00:00");
@@ -350,13 +111,11 @@ public class UtensilRepositoryUnitTest
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
 
         var repository = new UtensilRepository(
             gameRecordInfo,
             fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
+            fakeMemoryCache);
 
         var nextTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
         var endTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
@@ -385,13 +144,11 @@ public class UtensilRepositoryUnitTest
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
-        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
 
         var repository = new UtensilRepository(
             gameRecordInfo,
             fakeClient,
-            fakeMemoryCache,
-            absoluteExpirationRelativeToNow);
+            fakeMemoryCache);
 
         var nextTime = DateTime.Parse("2023-04-29T15:00:00+00:00");
         var endTime = DateTime.Parse("2023-04-29T15:00:31+00:00");

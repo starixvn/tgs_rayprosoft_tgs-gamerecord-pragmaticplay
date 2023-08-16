@@ -113,7 +113,7 @@ builder.Services
             var configuration = sp.GetRequiredService<IConfiguration>();
             options.Url = configuration.GetConnectionString("Nats")!;
         })
-        .AddHandler<ScheduleFormQueuedMessageHandler>(subject: "gp.gamerecord.scheduleform.pptf.queued", "gp.gamerecord.scheduleform.pptf");
+        .AddHandler<ScheduleFormQueuedMessageHandler>(subject: "gp.gamerecord.scheduleform.pptf.queued", "gp.gamerecord.scheduleform.pptf.queued");
     })
     .ClearAllExchanges()
     .AddNatsGlobPatternExchange("*");
