@@ -15,14 +15,12 @@
 		<PackageReference Include="Scrutor" Version="4.2.2" />
 		<PackageReference Include="StackExchange.Redis" Version="2.6.122" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
-		<PackageReference Include="Tgs.GameCommand.Client" Version="0.0.8" />
-		<PackageReference Include="Tgs.GameInterface.PragmaticPlay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.GameRecord.Handle.Client" Version="0.0.9" />
+		<PackageReference Include="Tgs.GameCommand.Client" Version="0.0.10" />
+		<PackageReference Include="Tgs.GameInterface.PragmaticPlay.Client" Version="0.0.8" />
+		<PackageReference Include="Tgs.GameRecord.Handle.Client" Version="0.0.30" />
 		<PackageReference Include="Tgs.GameRecordSchedules.Client" Version="0.0.8" />
 		<PackageReference Include="Tgs.GameRounds.Schedule.Client" Version="0.0.33" />
-		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.1" />
 		<PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
-		<PackageReference Include="Tgs.MessageQueue" Version="2.3.0" />
 	</ItemGroup>
 
 </Project>

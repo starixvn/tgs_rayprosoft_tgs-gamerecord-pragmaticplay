@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.GameCommand.Client;
-using Tgs.GameCommand.Common;
 
 namespace Tgs.GameRecord.PragmaticPlay.Core.UnitTest;
 
@@ -48,8 +47,7 @@ public class UtensilRepositoryUnitTest
             fakeMemoryCache);
 
         var actual = await repository
-            .GetGameProviderIdAsync()
-            .ConfigureAwait(false);
+            .GetGameProviderIdAsync();
 
         Assert.Equal(gameProviderId, actual);
 
@@ -59,7 +57,6 @@ public class UtensilRepositoryUnitTest
                 key: key,
                 gameProviderId);
     }
-
 
     [Fact]
     public void Is_Rund_Greater_Than_Current_Time()
