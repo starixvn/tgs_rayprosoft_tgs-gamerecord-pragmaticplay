@@ -44,7 +44,7 @@ public class HandleRecordCommandServiceUnitTest
                 Bet = 1m,
                 Settle = 0,
                 WinLoss = -1m,
-                AdditionalData = "{\"\"result\"\":\"\"Player\"\",\"\"bets\"\":[{\"\"c\"\":\"\"Plyr(NoComm)\"\",\"\"a\"\":\"\"1\"\"}]}"
+                AdditionalData = "{\"result\":\"Player\",\"bets\":[{\"c\":\"Plyr(NoComm)\",\"a\":\"1\"}]}"
             });
 
         var service = new HandleRecordCommandService(
