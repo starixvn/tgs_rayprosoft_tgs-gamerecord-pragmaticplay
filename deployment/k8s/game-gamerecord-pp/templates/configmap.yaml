@@ -9,7 +9,8 @@ data:
     {
       "Logging": {
         "LogLevel": {
-          "Default": "Warning"
+          "Default": "Warning",
+          "Tgs.GameRecord.Pinnacle.Messages": "Information"
         }
       },
       "GameRecordInfo": {
@@ -30,7 +31,6 @@ data:
       },
       "GameRecord": {
         "GameCommandClientBaseUrl": "http://game-gamecommand/",
-        "GameRoundsScheduleClientBaseUrl": "http://game-gamerounds-schedule:9090/",
         "GameInterfaceClientBaseUrl": "dns:///game-gameinterface-pp:9090/",
         "GameRecordSchedulesBaseUrl": "http://game-gamerecordschedules:9090/"
       }

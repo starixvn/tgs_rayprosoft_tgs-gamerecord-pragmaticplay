@@ -7,6 +7,8 @@ namespace Tgs.GameRecord.PragmaticPlay.Core.UnitTest;
 
 public class UtensilRepositoryUnitTest
 {
+    private static readonly string[] _GameDataTypes = ["RNG", "LC", "VSB"];
+
     [Fact]
     public async Task Get_GameProvider_Id()
     {
@@ -14,8 +16,9 @@ public class UtensilRepositoryUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,
@@ -65,8 +68,9 @@ public class UtensilRepositoryUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,
@@ -97,8 +101,9 @@ public class UtensilRepositoryUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,
@@ -130,8 +135,9 @@ public class UtensilRepositoryUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,

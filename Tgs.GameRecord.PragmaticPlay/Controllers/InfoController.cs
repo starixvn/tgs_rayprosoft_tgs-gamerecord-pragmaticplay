@@ -2,21 +2,16 @@
 using System.Net.Sockets;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Tgs.GameRecord.PragmaticPlay.Core;
 
 namespace Tgs.GameRecord.PragmaticPlay.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class InfoController : ControllerBase
+public class InfoController(
+    IOptions<GameRecordInfoOptions> gameRecordInfoOptions) : ControllerBase
 {
-    private readonly IConfiguration _configuration;
-
-    public InfoController(IConfiguration configuration)
-    {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
-
     [HttpGet]
     public async Task<object> GetAsync([FromServices] IWebHostEnvironment _hostingEnvironment)
     {
@@ -24,7 +19,6 @@ public class InfoController : ControllerBase
         var hostEntry = await Dns.GetHostEntryAsync(hostName);
         var hostIp = Array.Find(hostEntry.AddressList,
             x => x.AddressFamily == AddressFamily.InterNetwork);
-        var gameRecordInfo = _configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>();
 
         return new
         {
@@ -35,7 +29,7 @@ public class InfoController : ControllerBase
             OsVersion = $"{Environment.OSVersion}",
             Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
             ProcessCount = Environment.ProcessorCount,
-            gameRecordInfo,
+            GameRecordInfoOptions = gameRecordInfoOptions.Value
         };
     }
 }

@@ -4,7 +4,8 @@ public record GameRecordInfoOptions
 {
     public string GameProviderCode { get; set; } = default!;
     public string GameProviderConfiguration { get; set; } = default!;
-    public string GameProviderHangfire { get; init; } = default!;
+    public string HangfirePrefix { get; set; } = "gamerecord-pp-hangfire:";
+    public string HangfireLocking { get; set; } = "gamerecord-pp-locking:";
     public IEnumerable<string> GameDataTypes { get; init; } = default!;
     public double IntervalMinutes { get; set; } = 5d;
     public double IntervalMinutesMax { get; set; } = 10d;

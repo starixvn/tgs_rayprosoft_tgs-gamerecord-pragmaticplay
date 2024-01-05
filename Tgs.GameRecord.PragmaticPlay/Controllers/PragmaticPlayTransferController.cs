@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Tgs.GameRecord.PragmaticPlay.Core.ApplicationServices;
-using Tgs.ServiceUtility;
+﻿using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Tgs.GameRecord.PragmaticPlay.Common;
+using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.PragmaticPlay.Controllers;
 
@@ -9,9 +11,9 @@ namespace Tgs.GameRecord.PragmaticPlay.Controllers;
 public class PragmaticPlayTransferController : ControllerBase
 {
     /// <summary>
-    /// Games the record asynchronous.
+    /// Games the record manual asynchronous.
     /// </summary>
-    /// <param name="service">The service.</param>
+    /// <param name="messageSender">The message sender.</param>
     /// <param name="source">The source.</param>
     /// <returns></returns>
     /// <remarks>
@@ -50,18 +52,18 @@ public class PragmaticPlayTransferController : ControllerBase
     ///         }
     /// </remarks>
     [HttpPost("manual")]
-    public ValueTask GameRecordAsync(
-       [FromServices] ICommandService<ManualPullRecordCommand> service,
-       [FromBody] ManualPullRecordCommand source)
-        => service
-        .ExecuteAsync(
-            command: source,
+    public ValueTask GameRecordManualAsync(
+        [FromServices] IMessageSender messageSender,
+        PragmaticPlayGameRecordManualMessage source)
+        => messageSender.PublishAsync(
+            subject: PragmaticPlayNatsConst.ManualPublish,
+            data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
             cancellationToken: HttpContext.RequestAborted);
 
     /// <summary>
-    /// Games the record asynchronous.
+    /// Games the record schedule asynchronous.
     /// </summary>
-    /// <param name="service">The service.</param>
+    /// <param name="messageSender">The message sender.</param>
     /// <param name="source">The source.</param>
     /// <returns></returns>
     /// <remarks>
@@ -94,11 +96,11 @@ public class PragmaticPlayTransferController : ControllerBase
     ///         }
     /// </remarks>
     [HttpPost("schedule")]
-    public ValueTask GameRecordAsync(
-       [FromServices] ICommandService<SchedulePullRecordCommand> service,
-       [FromBody] SchedulePullRecordCommand source)
-        => service
-        .ExecuteAsync(
-            command: source,
+    public ValueTask GameRecordScheduleAsync(
+        [FromServices] IMessageSender messageSender,
+        PragmaticPlayGameRecordScheduleMessage source)
+        => messageSender.PublishAsync(
+            subject: PragmaticPlayNatsConst.SchedulePublish,
+            data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
             cancellationToken: HttpContext.RequestAborted);
 }

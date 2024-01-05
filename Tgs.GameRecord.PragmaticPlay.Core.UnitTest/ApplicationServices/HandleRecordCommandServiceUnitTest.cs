@@ -10,6 +10,8 @@ namespace Tgs.GameRecord.PragmaticPlay.Core.UnitTest.ApplicationServices;
 
 public class HandleRecordCommandServiceUnitTest
 {
+    private static readonly string[] _GameDataTypes = ["RNG", "LC", "VSB"];
+
     [Fact]
     public async void Normal_Process_Settlement_Loss()
     {
@@ -17,8 +19,9 @@ public class HandleRecordCommandServiceUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,
@@ -84,8 +87,9 @@ public class HandleRecordCommandServiceUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,
@@ -151,8 +155,9 @@ public class HandleRecordCommandServiceUnitTest
         {
             GameProviderCode = "PPTF",
             GameProviderConfiguration = "PPTFConfiguration",
-            GameProviderHangfire = "pptf-schedule:hangfire:",
-            GameDataTypes = new[] { "RNG", "LC", "VSB" },
+            HangfirePrefix = "gamerecord-pp-hangfire:",
+            HangfireLocking = "gamerecord-pp-locking:",
+            GameDataTypes = _GameDataTypes,
             IntervalMinutes = 1,
             IntervalMinutesMax = 10,
             IntervalMinutesMinimum = 1,

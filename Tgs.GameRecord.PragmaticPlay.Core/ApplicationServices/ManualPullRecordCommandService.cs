@@ -5,39 +5,24 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.PragmaticPlay.Core.ApplicationServices;
 
-internal class ManualPullRecordCommandService : ICommandService<ManualPullRecordCommand>
+internal class ManualPullRecordCommandService(
+    ILogger<ManualPullRecordCommandService> logger,
+    IGameInterfacePragmaticPlayClient client,
+    IUtensil utensil,
+    ISystemClock systemClock,
+    ICommandService<HandleRecordCommand> service) : ICommandService<ManualPullRecordCommand>
 {
-    private readonly IGameInterfacePragmaticPlayClient _client;
-    private readonly ILogger<ManualPullRecordCommandService> _logger;
-    private readonly ICommandService<HandleRecordCommand> _service;
-    private readonly ISystemClock _systemClock;
-    private readonly IUtensil _utensil;
-
-    public ManualPullRecordCommandService(
-        ILogger<ManualPullRecordCommandService> logger,
-        IGameInterfacePragmaticPlayClient client,
-        IUtensil utensil,
-        ISystemClock systemClock,
-        ICommandService<HandleRecordCommand> service)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
-        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-    }
-
     public async ValueTask ExecuteAsync(ManualPullRecordCommand command, CancellationToken cancellationToken = default)
     {
         var nextTime = command.StartTime;
         var endTime = command.EndTime;
-        var currentTime = _systemClock.CurrentTime;
+        var currentTime = systemClock.CurrentTime;
 
-        while (_utensil.IsRun(nextTime, endTime, currentTime))
+        while (utensil.IsRun(nextTime, endTime, currentTime))
         {
             var result = command.DataType.ToUpper() switch
             {
-                "LC" => await _client
+                "LC" => await client
                 .GameRecordByLiveAsync(
                     apiUrl: command.ApiUrl,
                     secureLogin: command.SecureLogin,
@@ -45,7 +30,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
                     startTime: nextTime,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false),
-                "VSB" => await _client
+                "VSB" => await client
                 .GameRecordByVirtualSportsAsync(
                     apiUrl: command.ApiUrl,
                     secureLogin: command.SecureLogin,
@@ -53,7 +38,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
                     startTime: nextTime,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false),
-                _ => await _client
+                _ => await client
                 .GameRecordBySlotAsync(
                     apiUrl: command.ApiUrl,
                     secureLogin: command.SecureLogin,
@@ -72,7 +57,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
                 nextTime = result.NextTime.ToDateTimeOffset();
             }
 
-            _logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | currentTime:{currentTime}| while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), currentTime.ToString("O"), currentTime.ToString("O"), _utensil.IsRun(nextTime, currentTime, currentTime));
+            logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | currentTime:{currentTime}| while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), currentTime.ToString("O"), currentTime.ToString("O"), utensil.IsRun(nextTime, currentTime, currentTime));
 
             var gameRecords = result.Items
                 ?? Enumerable.Empty<GameRecordData>();
@@ -84,11 +69,11 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
 
             foreach (var gameRecord in gameRecords)
             {
-                _logger.LogDebug("LogOn:{logOn} Message: Settlement. GameRecords:{gameRecord}", DateTime.Now.ToString("o"), gameRecord);
+                logger.LogDebug("LogOn:{logOn} Message: Settlement. GameRecords:{gameRecord}", DateTime.Now.ToString("o"), gameRecord);
 
                 try
                 {
-                    await _service
+                    await service
                         .ExecuteAsync(
                         command: new(gameRecord),
                         cancellationToken: cancellationToken)
@@ -96,7 +81,7 @@ internal class ManualPullRecordCommandService : ICommandService<ManualPullRecord
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "LogOn:{logOn} Message: An exception occurred in this game record.({gameRecord})", DateTime.Now.ToString("o"), gameRecord);
+                    logger.LogError(ex, "LogOn:{logOn} Message: An exception occurred in this game record.({gameRecord})", DateTime.Now.ToString("o"), gameRecord);
                 }
             }
         }

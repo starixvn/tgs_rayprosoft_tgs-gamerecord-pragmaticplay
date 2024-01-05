@@ -1,44 +1,31 @@
-﻿using Microsoft.Extensions.Logging;
-using Tgs.GameRounds.Schedule.Client;
+﻿using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Tgs.GameRecord.PragmaticPlay.Common;
 using Tgs.ServiceUtility;
+using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.PragmaticPlay.Core.JobApplicationServices;
 
-internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
+internal class JobExecuteCommandService(
+    ILogger<JobExecuteCommandService> logger,
+    IMessageSender messageSender) : ICommandService<JobExecuteCommand>
 {
-    private readonly IGameRoundsScheduleClient _client;
-    private readonly ILogger<JobExecuteCommandService> _logger;
-
-    public JobExecuteCommandService(
-        ILogger<JobExecuteCommandService> logger,
-        IGameRoundsScheduleClient client)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public ValueTask ExecuteAsync(JobExecuteCommand command, CancellationToken cancellationToken = default)
     {
-        var parameters = new
+        var parameters = new PragmaticPlayGameRecordScheduleMessage
         {
-            command.GameProviderCode,
-            command.ApiUrl,
-            command.SecureLogin,
-            command.SecretKey,
-            command.DataType
+            ApiUrl = command.ApiUrl,
+            SecureLogin = command.SecureLogin,
+            SecretKey = command.SecretKey,
+            DataType = command.DataType
         };
 
-        _logger.LogInformation("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
+        logger.LogInformation("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
 
-        return _client
-            .PragmaticPlay_ScheduleFormQueuedAsync(
-            gameProviderCode: command.GameProviderCode,
-            name: command.Name,
-            subject: "gp.gamerecord.scheduleform.pptf.queued",
-            apiUrl: parameters.ApiUrl,
-            secureLogin: parameters.SecureLogin,
-            secretKey: parameters.SecretKey,
-            dataType: parameters.DataType,
+        return messageSender.PublishAsync(
+            subject: PragmaticPlayNatsConst.SchedulePublish,
+            data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(parameters)),
             cancellationToken: cancellationToken);
     }
 }

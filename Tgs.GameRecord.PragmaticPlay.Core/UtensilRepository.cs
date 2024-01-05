@@ -4,36 +4,27 @@ using Tgs.GameCommand.Client;
 
 namespace Tgs.GameRecord.PragmaticPlay.Core;
 
-internal class UtensilRepository : IUtensil
+internal class UtensilRepository(
+    IOptions<GameRecordInfoOptions> options,
+    IGameCommandClient client,
+    IMemoryCache memoryCache) : IUtensil
 {
-    private readonly IGameCommandClient _client;
-    private readonly GameRecordInfoOptions _gameRecordInfo;
-    private readonly IMemoryCache _memoryCache;
-
-    public UtensilRepository(
-        IOptions<GameRecordInfoOptions> options,
-        IGameCommandClient client,
-        IMemoryCache memoryCache)
-    {
-        _gameRecordInfo = options.Value;
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+    private readonly GameRecordInfoOptions _gameRecordInfo = options.Value;
 
     public async ValueTask<Guid> GetGameProviderIdAsync(
         CancellationToken cancellationToken = default)
     {
         var key = $"gamerecord:{_gameRecordInfo.GameProviderCode}";
-        if (!_memoryCache.TryGetValue(key, out Guid gameProviderId))
+        if (!memoryCache.TryGetValue(key, out Guid gameProviderId))
         {
-            gameProviderId = await _client
+            gameProviderId = await client
                 .GameProviderGetGameProviderIdAsync(
                     gameProviderCode: _gameRecordInfo.GameProviderCode,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false)
                 ?? throw new Exception($"The identifier for this game provider does not exist.({_gameRecordInfo.GameProviderCode})");
 
-            return _memoryCache.Set(key, gameProviderId);
+            return memoryCache.Set(key, gameProviderId);
         }
         return gameProviderId;
     }
