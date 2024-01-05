@@ -10,7 +10,7 @@ data:
       "Logging": {
         "LogLevel": {
           "Default": "Warning",
-          "Tgs.GameRecord.Pinnacle.Messages": "Information"
+          "Tgs.GameRecord.PragmaticPlay.Messages": "Information"
         }
       },
       "GameRecordInfo": {
