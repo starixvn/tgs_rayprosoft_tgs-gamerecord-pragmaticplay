@@ -4,6 +4,7 @@ using Hangfire;
 using Hangfire.Console;
 using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Mvc;
+using NATS.Client.Core;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -12,6 +13,7 @@ using Tgs.GameRecord.PragmaticPlay;
 using Tgs.GameRecord.PragmaticPlay.Common;
 using Tgs.GameRecord.PragmaticPlay.Core;
 using Tgs.GameRecord.PragmaticPlay.Messages;
+using Tgs.MessageQueue.Nats.Serializers;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
 
@@ -97,19 +99,17 @@ builder.Services.AddGameRecord(
     });
 
 builder.Services
-    .AddMessageQueue()
-    .AddNatsMessageQueue(natsConfig =>
+    .AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with
     {
-        _ = natsConfig
-        .ConfigQueueOptions((options, sp) =>
-        {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-            options.Url = configuration.GetConnectionString("Nats")!;
-        })
-        .AddHandler<GameRecordScheduleMessageHandler>(PragmaticPlayNatsConst.SchedulePublish, PragmaticPlayNatsConst.SchedulePublish)
-        .AddHandler<GameRecordManualMessageHandler>(PragmaticPlayNatsConst.ManualPublish, PragmaticPlayNatsConst.ManualPublish);
-    })
-    .ClearAllExchanges()
+        Url = builder.Configuration.GetConnectionString("Nats")!,
+        SerializerRegistry = TgsNatsSerializerRegistration.Default
+    }))
+    .AddMessageQueue()
+    .AddNatsMessageQueue(config => config
+    .ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
+    .AddHandler<GameRecordScheduleMessageHandler>(PragmaticPlayNatsConst.SchedulePublish, PragmaticPlayNatsConst.SchedulePublish)
+    .AddHandler<GameRecordManualMessageHandler>(PragmaticPlayNatsConst.ManualPublish, PragmaticPlayNatsConst.ManualPublish))
+     .ClearAllExchanges()
     .AddNatsGlobPatternExchange("*");
 
 builder.Services

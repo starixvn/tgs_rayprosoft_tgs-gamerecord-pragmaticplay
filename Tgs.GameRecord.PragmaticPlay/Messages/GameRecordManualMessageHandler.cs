@@ -9,15 +9,18 @@ namespace Tgs.GameRecord.PragmaticPlay.Messages;
 
 internal class GameRecordManualMessageHandler(
     ILogger<GameRecordManualMessageHandler> logger,
-    ICommandService<ManualPullRecordCommand> service) : IMessageHandler
+    ICommandService<ManualPullRecordCommand> service) : IMessageHandler<ReadOnlyMemory<byte>>
 {
-    public ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    public ValueTask HandleAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
     {
         var json = Encoding.UTF8.GetString(data.Span);
         var message = JsonSerializer.Deserialize<PragmaticPlayGameRecordManualMessage>(json)
             ?? throw new NullReferenceException("The request data resolves to a null value");
 
-        logger.LogInformation("LogOn:{logOn} Information Request:{message}", DateTime.Now.ToString("o"), message);
+        logger.LogInformation("LogOn:{logOn} Subject:{subject} Information Request:{message}",
+            DateTime.Now.ToString("o"),
+            subject,
+            message);
 
         var command = new ManualPullRecordCommand(
             ApiUrl: message.ApiUrl,

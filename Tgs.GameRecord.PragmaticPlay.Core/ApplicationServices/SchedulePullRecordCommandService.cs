@@ -20,9 +20,8 @@ internal class SchedulePullRecordCommandService(
 
     public async ValueTask ExecuteAsync(SchedulePullRecordCommand command, CancellationToken cancellationToken = default)
     {
-        if (!await schedulePullRecordLock
-            .LockingAsync(
-                command.DataType)
+        if (!await schedulePullRecordLock.LockingAsync(
+            dataType: command.DataType)
             .ConfigureAwait(false))
         {
             logger.LogWarning("LogOn:{logOn} Message:This data type ({DataType}) pull record has been locked.",
@@ -136,9 +135,10 @@ internal class SchedulePullRecordCommandService(
             }
             _ = await gameRecordScheduleService.UpdateAsync(
                 gameRecordSchedule: gameRecordSchedule,
-                 dataType: command.DataType,
-                 nextTime: nextTime,
-                 cancellationToken: cancellationToken).ConfigureAwait(false);
+                dataType: command.DataType,
+                nextTime: nextTime,
+                cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -146,9 +146,8 @@ internal class SchedulePullRecordCommandService(
         }
         finally
         {
-            _ = await schedulePullRecordLock
-                .UnlockAsync(
-                    command.DataType)
+            _ = await schedulePullRecordLock.UnlockAsync(
+                command.DataType)
                 .ConfigureAwait(false);
         }
     }
