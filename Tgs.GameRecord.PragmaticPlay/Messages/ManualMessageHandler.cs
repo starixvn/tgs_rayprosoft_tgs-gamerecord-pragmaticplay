@@ -7,8 +7,8 @@ using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.PragmaticPlay.Messages;
 
-internal class GameRecordManualMessageHandler(
-    ILogger<GameRecordManualMessageHandler> logger,
+internal class ManualMessageHandler(
+    ILogger<ManualMessageHandler> logger,
     ICommandService<ManualPullRecordCommand> service) : IMessageHandler<ReadOnlyMemory<byte>>
 {
     public ValueTask HandleAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
@@ -17,12 +17,12 @@ internal class GameRecordManualMessageHandler(
         var message = JsonSerializer.Deserialize<PragmaticPlayGameRecordManualMessage>(json)
             ?? throw new NullReferenceException("The request data resolves to a null value");
 
-        logger.LogInformation("LogOn:{logOn} Subject:{subject} Information Request:{message}",
-            DateTime.Now.ToString("o"),
-            subject,
-            message);
+		logger.LogInformation("LogOn:{logOn} Subject:{subject} Information Request:{message}",
+			DateTime.Now.ToString("o"),
+			subject,
+			message);
 
-        var command = new ManualPullRecordCommand(
+		var command = new ManualPullRecordCommand(
             ApiUrl: message.ApiUrl,
             SecureLogin: message.SecureLogin,
             SecretKey: message.SecretKey,
