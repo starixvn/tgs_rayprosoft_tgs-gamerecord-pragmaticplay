@@ -5,12 +5,12 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<UserSecretsId>1801eb9f-203f-49d6-8df0-7b37c99b3fa6</UserSecretsId>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<NoWarn>$(NoWarn);1591;0063</NoWarn>
-		<UserSecretsId>1801eb9f-203f-49d6-8df0-7b37c99b3fa6</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
