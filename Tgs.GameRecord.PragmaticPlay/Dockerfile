@@ -9,11 +9,11 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["nuget.config", "."]
 COPY ["Tgs.GameRecord.PragmaticPlay/Tgs.GameRecord.PragmaticPlay.csproj", "Tgs.GameRecord.PragmaticPlay/"]
 COPY ["Tgs.GameRecord.PragmaticPlay.Core/Tgs.GameRecord.PragmaticPlay.Core.csproj", "Tgs.GameRecord.PragmaticPlay.Core/"]
 COPY ["Tgs.GameRecord.PragmaticPlay.Common/Tgs.GameRecord.PragmaticPlay.Common.csproj", "Tgs.GameRecord.PragmaticPlay.Common/"]
-RUN dotnet restore "./Tgs.GameRecord.PragmaticPlay/./Tgs.GameRecord.PragmaticPlay.csproj"
+COPY ["Tgs.GameRecord.PragmaticPlay.Repositories/Tgs.GameRecord.PragmaticPlay.Repositories.csproj", "Tgs.GameRecord.PragmaticPlay.Repositories/"]
+RUN dotnet restore "./Tgs.GameRecord.PragmaticPlay/Tgs.GameRecord.PragmaticPlay.csproj"
 COPY . .
 WORKDIR "/src/Tgs.GameRecord.PragmaticPlay"
 RUN dotnet build "./Tgs.GameRecord.PragmaticPlay.csproj" -c $BUILD_CONFIGURATION -o /app/build

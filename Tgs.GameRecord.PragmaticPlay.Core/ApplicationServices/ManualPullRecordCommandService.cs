@@ -8,7 +8,7 @@ namespace Tgs.GameRecord.PragmaticPlay.Core.ApplicationServices;
 internal class ManualPullRecordCommandService(
 	ILogger<ManualPullRecordCommandService> logger,
 	IGameInterfacePragmaticPlayClient client,
-	IUtensil utensil,
+	IUtensilRepository utensil,
 	TimeProvider timeProvider,
 	ICommandService<HandleRecordCommand> service) : ICommandService<ManualPullRecordCommand>
 {

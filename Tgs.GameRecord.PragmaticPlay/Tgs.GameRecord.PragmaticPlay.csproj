@@ -5,12 +5,12 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<UserSecretsId>1801eb9f-203f-49d6-8df0-7b37c99b3fa6</UserSecretsId>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<NoWarn>$(NoWarn);1591;0063</NoWarn>
-		<UserSecretsId>1801eb9f-203f-49d6-8df0-7b37c99b3fa6</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,13 +24,14 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcCore" Version="1.0.0-beta.5" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.3" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Tgs.GameRecord.PragmaticPlay.Core\Tgs.GameRecord.PragmaticPlay.Core.csproj" />
+		<ProjectReference Include="..\Tgs.GameRecord.PragmaticPlay.Repositories\Tgs.GameRecord.PragmaticPlay.Repositories.csproj" />
 	</ItemGroup>
 
 </Project>
