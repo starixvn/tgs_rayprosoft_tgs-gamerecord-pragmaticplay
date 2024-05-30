@@ -9,10 +9,10 @@ namespace Tgs.GameRecord.PragmaticPlay.Core.ApplicationServices;
 internal class SchedulePullRecordCommandService(
 	ILogger<SchedulePullRecordCommandService> logger,
 	IOptions<GameRecordInfoOptions> options,
-	ISchedulePullRecordLock schedulePullRecordLock,
-	IUtensil utensil,
-	IGameRecordScheduleService gameRecordScheduleService,
 	TimeProvider timeProvider,
+	IGameRecordScheduleLockRepository scheduleLockRepository,
+	IGameRecordScheduleRepository scheduleRepository,
+	IUtensilRepository utensil,
 	IGameInterfacePragmaticPlayClient client,
 	ICommandService<HandleRecordCommand> service) : ICommandService<SchedulePullRecordCommand>
 {
@@ -20,8 +20,10 @@ internal class SchedulePullRecordCommandService(
 
 	public async ValueTask ExecuteAsync(SchedulePullRecordCommand command, CancellationToken cancellationToken = default)
 	{
-		if (!await schedulePullRecordLock.LockingAsync(
-			dataType: command.DataType)
+		if (!await scheduleLockRepository.LockingAsync(
+			secureLogin: command.SecureLogin,
+			dataType: command.DataType,
+			cancellationToken: cancellationToken)
 			.ConfigureAwait(false))
 		{
 			logger.LogWarning("LogOn:{logOn} Message:This data type ({DataType}) pull record has been locked.",
@@ -32,33 +34,25 @@ internal class SchedulePullRecordCommandService(
 
 		try
 		{
-			var gameProviderId = await utensil
-				.GetGameProviderIdAsync(
+			var gameRecordSchedule = await scheduleRepository.GetAsync(
+				secureLogin: command.SecureLogin,
+				dataType: command.DataType,
+				cancellationToken: cancellationToken)
+				.ConfigureAwait(false)
+				?? await scheduleRepository.AddAsync(
+					secureLogin: command.SecureLogin,
+					dataType: command.DataType,
+					nextTime: timeProvider.GetUtcNow().AddMinutes(-10),
 					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
-			var gameRecordSchedule =
-				await gameRecordScheduleService
-				.GetAsync(
-					dataType: command.DataType,
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false) ??
-				await gameRecordScheduleService
-				.InitAsync(
-					gameProviderId: gameProviderId,
-					dataType: command.DataType,
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false)
-				?? throw new Exception($"Failed to get Game Record Schedule data.({command.DataType})");
-
-			var config = gameRecordScheduleService.GetConfig(gameRecordSchedule);
 
 			var startTime = command.DataType switch
 			{
 				var dataType when dataType.Equals("LC", StringComparison.OrdinalIgnoreCase)
-				=> config.NextTime.AddMinutes(-_gameRecordInfoOptions.LiveDealerIntervalMinutes),
+				=> gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.LiveDealerIntervalMinutes),
 				var dataType when dataType.Equals("VSB", StringComparison.OrdinalIgnoreCase)
-				=> config.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinutes),
-				_ => config.NextTime.AddMinutes(-_gameRecordInfoOptions.IntervalMinutes)
+				=> gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinutes),
+				_ => gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.IntervalMinutes)
 			};
 
 			var nextTime = startTime;
@@ -121,10 +115,9 @@ internal class SchedulePullRecordCommandService(
 
 					try
 					{
-						await service
-							.ExecuteAsync(
-								command: new(gameRecord),
-								cancellationToken: cancellationToken)
+						await service.ExecuteAsync(
+							command: new(gameRecord),
+							cancellationToken: cancellationToken)
 							.ConfigureAwait(false);
 					}
 					catch (Exception ex)
@@ -134,8 +127,8 @@ internal class SchedulePullRecordCommandService(
 				}
 			}
 
-			_ = await gameRecordScheduleService.UpdateAsync(
-				gameRecordSchedule: gameRecordSchedule,
+			await scheduleRepository.UpdateAsync(
+				secureLogin: command.SecureLogin,
 				dataType: command.DataType,
 				nextTime: nextTime,
 				cancellationToken: cancellationToken)
@@ -147,8 +140,10 @@ internal class SchedulePullRecordCommandService(
 		}
 		finally
 		{
-			_ = await schedulePullRecordLock.UnlockAsync(
-				command.DataType)
+			_ = await scheduleLockRepository.UnlockAsync(
+				secureLogin: command.SecureLogin,
+				dataType: command.DataType,
+				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 		}
 	}

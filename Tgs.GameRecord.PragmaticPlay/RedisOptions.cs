@@ -1,7 +1,6 @@
-﻿using Tgs.GameRecord.PragmaticPlay.Core;
-namespace Tgs.GameRecord.PragmaticPlay;
+﻿namespace Tgs.GameRecord.PragmaticPlay;
 
 public record RedisOptions
 {
-    public string ConnectionString { get; set; } = "localhost";
+	public string ConnectionString { get; set; } = "localhost";
 }

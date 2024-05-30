@@ -42,21 +42,30 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-            - name: ConnectionStrings__Nats
+            - name: ConnectionStrings__Mongo
               valueFrom:
                 secretKeyRef:
                   name: tgs-connections
-                  key: nats
+                  key: mongo-gp
             - name: ConnectionStrings__Redis
               valueFrom:
                 secretKeyRef:
                   name: tgs-connections
                   key: redis
+            - name: ConnectionStrings__Nats
+              valueFrom:
+                secretKeyRef:
+                  name: tgs-connections
+                  key: nats
           volumeMounts:
             - mountPath: /app/appsettings.Production.json
               name: appsettings
               readOnly: true
               subPath: appsettings.json
+            - mountPath: /etc/ssl/certs/rds-combined-ca-bundle.pem
+              name: rds-combined-ca-bundle
+              readOnly: true
+              subPath: rds-combined-ca-bundle.pem
           ports:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
@@ -122,6 +131,9 @@ spec:
         - name: appsettings
           configMap:
             name: configmap-{{ include "game-gamerecord-pp.fullname" . }}
+        - name: rds-combined-ca-bundle
+          secret:
+            secretName: rds-combined-ca-bundle
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

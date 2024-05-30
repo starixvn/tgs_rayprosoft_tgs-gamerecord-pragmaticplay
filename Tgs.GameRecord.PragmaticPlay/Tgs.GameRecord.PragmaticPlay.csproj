@@ -31,6 +31,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Tgs.GameRecord.PragmaticPlay.Core\Tgs.GameRecord.PragmaticPlay.Core.csproj" />
+		<ProjectReference Include="..\Tgs.GameRecord.PragmaticPlay.Repositories\Tgs.GameRecord.PragmaticPlay.Repositories.csproj" />
 	</ItemGroup>
 
 </Project>

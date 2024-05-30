@@ -70,6 +70,11 @@ builder.Services.AddGameRecord(
 	(options, sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
+		options.ConnectionString = configuration.GetConnectionString("Mongo")!;
+	},
+	(options, sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
 		options.ConnectionString = configuration.GetConnectionString("Redis")!;
 	},
 	(options, sp) =>
@@ -86,12 +91,9 @@ builder.Services.AddGameRecord(
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
 		options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceClientBaseUrl")!;
-	},
-	(options, sp) =>
-	{
-		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRecordSchedulesBaseUrl")!;
 	});
+//
+builder.Services.AddHostedService<InitStartup>();
 
 builder.Services
 	.AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with
