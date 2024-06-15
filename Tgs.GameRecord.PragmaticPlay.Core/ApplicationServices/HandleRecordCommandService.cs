@@ -30,7 +30,11 @@ internal class HandleRecordCommandService(
 			settle = command.Record.Settle.ToDecimal().GetValueOrDefault(0);
 			turnover = command.Record.Bet.ToDecimal().GetValueOrDefault(0);
 			winLoss = command.Record.WinLoss.ToDecimal().GetValueOrDefault(0);
-			betState = winLoss <= 0 ? Handle.Common.Protos.BetState.Loss : Handle.Common.Protos.BetState.Win;
+			betState = command.Record.IsCancel
+				? Handle.Common.Protos.BetState.Cancel
+				: winLoss <= 0
+					? Handle.Common.Protos.BetState.Loss
+					: Handle.Common.Protos.BetState.Win;
 		}
 
 		var request = new Handle.Common.Protos.GameRecordHandleRequest
