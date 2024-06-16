@@ -27,8 +27,9 @@ internal class HandleRecordCommandService(
 		if (command.Record.IsClosed)
 		{
 			externalClosedOn = command.Record.ExternalClosedOn.ToDateTimeOffset();
+			validBet = (!command.Record.IsCancel) ? command.Record.Bet.ToDecimal().GetValueOrDefault(0) : 0.0m;
 			settle = command.Record.Settle.ToDecimal().GetValueOrDefault(0);
-			turnover = command.Record.Bet.ToDecimal().GetValueOrDefault(0);
+			turnover = (!command.Record.IsCancel) ? command.Record.Bet.ToDecimal().GetValueOrDefault(0) : 0.0m;
 			winLoss = command.Record.WinLoss.ToDecimal().GetValueOrDefault(0);
 			betState = command.Record.IsCancel
 				? Handle.Common.Protos.BetState.Cancel
