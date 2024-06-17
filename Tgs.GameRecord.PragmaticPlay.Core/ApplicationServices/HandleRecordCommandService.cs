@@ -19,17 +19,13 @@ internal class HandleRecordCommandService(
 		var externalCreatedOn = command.Record.ExternalCreatedOn.ToDateTimeOffset();
 		var externalClosedOn = DateTimeOffset.UnixEpoch;
 		var bet = command.Record.Bet.ToDecimal().GetValueOrDefault(0);
-		var validBet = command.Record.Bet.ToDecimal().GetValueOrDefault(0);
 		var settle = 0.0m;
-		var turnover = 0.0m;
 		var winLoss = 0.0m;
 		var betState = Handle.Common.Protos.BetState.Running;
 		if (command.Record.IsClosed)
 		{
 			externalClosedOn = command.Record.ExternalClosedOn.ToDateTimeOffset();
-			validBet = (!command.Record.IsCancel) ? command.Record.Bet.ToDecimal().GetValueOrDefault(0) : 0.0m;
 			settle = command.Record.Settle.ToDecimal().GetValueOrDefault(0);
-			turnover = (!command.Record.IsCancel) ? command.Record.Bet.ToDecimal().GetValueOrDefault(0) : 0.0m;
 			winLoss = command.Record.WinLoss.ToDecimal().GetValueOrDefault(0);
 			betState = command.Record.IsCancel
 				? Handle.Common.Protos.BetState.Cancel
@@ -57,10 +53,10 @@ internal class HandleRecordCommandService(
 			ResettleState = Handle.Common.Protos.ResettleState.None,
 			JackpotState = Handle.Common.Protos.JackpotState.None,
 			Bet = bet,
-			ValidBet = validBet,
+			ValidBet = bet,
 			Settle = settle,
 			Commission = 0.0m,
-			Turnover = turnover,
+			Turnover = bet,
 			WinLoss = winLoss,
 			Jackpot = 0.0M,
 			AdditionalData = command.Record.AdditionalData

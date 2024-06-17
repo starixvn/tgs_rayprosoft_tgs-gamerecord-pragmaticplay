@@ -40,6 +40,7 @@ public class HandleRecordCommandServiceUnitTest
 				ExternalGameId = "439",
 				PlayerCode = "4ucmqplxb029",
 				IsClosed = true,
+				IsCancel = false,
 				ExternalCreatedOn = DateTimeOffset.Parse("2023-04-21T03:24:14+00:00").ToTimestamp(),
 				ExternalClosedOn = DateTimeOffset.Parse("2023-04-21T03:24:38+00:00").ToTimestamp(),
 				Bet = 1m,
@@ -116,6 +117,7 @@ public class HandleRecordCommandServiceUnitTest
 				ExternalGameId = "22020",
 				PlayerCode = "4uispltzj9d8",
 				IsClosed = true,
+				IsCancel = false,
 				ExternalCreatedOn = DateTimeOffset.Parse("2023-04-10 23:45:22+08:00").ToTimestamp(),
 				ExternalClosedOn = DateTimeOffset.Parse("2023-04-10 23:45:52+08:00").ToTimestamp(),
 				Bet = 100m,
@@ -192,6 +194,7 @@ public class HandleRecordCommandServiceUnitTest
 				ExternalGameId = "22020",
 				PlayerCode = "4uispltzj9d8",
 				IsClosed = false,
+				IsCancel = false,
 				ExternalCreatedOn = DateTimeOffset.Parse("2023-04-10 23:45:22+08:00").ToTimestamp(),
 				ExternalClosedOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
 				Bet = 100m,
@@ -233,8 +236,85 @@ public class HandleRecordCommandServiceUnitTest
 				ValidBet = 100m,
 				Settle = 0.0M,
 				Commission = 0.0M,
-				Turnover = 0.0M,
+				Turnover = 100m,
 				WinLoss = 0.0M,
+				Jackpot = 0.0M,
+				AdditionalData = command.Record.AdditionalData
+			}),
+			cancellationToken: Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public async Task Cancel()
+	{
+		var faceLogger = NullLogger<HandleRecordCommandService>.Instance;
+		var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+		{
+			GameProviderCode = "PPTF",
+			GameProviderConfiguration = "PPTFConfiguration",
+			HangfirePrefix = "gamerecord-pp-hangfire:",
+			HangfireLocking = "gamerecord-pp-locking:",
+			GameDataTypes = _GameDataTypes,
+			IntervalMinutes = 1,
+			IntervalMinutesMax = 10,
+			IntervalMinutesMinimum = 1,
+			VirtualSportsIntervalMinutes = 10,
+			LiveDealerIntervalMinutes = 5,
+			LockMinute = 8
+		});
+		var fakeMessageSender = Substitute.For<IMessageSender>();
+
+		var command = new HandleRecordCommand(
+			Record: new GameRecordData
+			{
+				ExternalRoundId = "97419402008",
+				ExternalGameId = "439",
+				PlayerCode = "4ucmqplxb029",
+				IsClosed = true,
+				IsCancel = true,
+				ExternalCreatedOn = DateTimeOffset.Parse("2024-06-04T05:25:25+00:00").ToTimestamp(),
+				ExternalClosedOn = DateTimeOffset.Parse("2024-06-04T05:25:25+00:00").ToTimestamp(),
+				Bet = 6.0m,
+				Settle = 0,
+				WinLoss = -6.0m,
+				AdditionalData = "{\"Bet\":6.0,\"Currency\":\"CNY\",\"EndDate\":null,\"ExtPlayerID\":\"4udvzfxyzowl\",\"GameID\":\"vswayscharms\",\"Jackpot\":0.0,\"ParentSessionID\":null,\"PlayerID\":6270808,\"PlaySessionID\":\"620757986000\",\"StartDate\":\"2024-06-04 05:25:25\",\"Status\":\"C\",\"Type\":\"R\",\"Win\":0.0}"
+			});
+
+		var service = new HandleRecordCommandService(
+			faceLogger,
+			gameRecordInfo,
+			fakeMessageSender);
+
+		await service.ExecuteAsync(command);
+
+		_ = fakeMessageSender
+			.Received(1)
+			.PublishAsync(
+			subject: Arg.Is(Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest),
+			data: Arg.Is(new Handle.Common.Protos.GameRecordHandleRequest
+			{
+				GameProviderCode = gameRecordInfo.Value.GameProviderCode,
+				PlayerCode = command.Record.PlayerCode,
+				ExternalRoundId = command.Record.ExternalRoundId,
+				ExternalBetId = command.Record.ExternalRoundId,
+				ExternalGameId = command.Record.ExternalGameId,
+				ExternalCreatedOn = command.Record.ExternalCreatedOn,
+				ExternalClosedOn = command.Record.ExternalClosedOn,
+				ExternalPayoffOn = command.Record.ExternalClosedOn,
+				ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+				BetState = Handle.Common.Protos.BetState.Cancel,
+				BetType = Handle.Common.Protos.BetType.Normal,
+				FreeGameState = Handle.Common.Protos.FreeGameState.None,
+				GambleState = Handle.Common.Protos.GambleState.None,
+				CashoutState = Handle.Common.Protos.CashoutState.None,
+				ResettleState = Handle.Common.Protos.ResettleState.None,
+				JackpotState = Handle.Common.Protos.JackpotState.None,
+				Bet = 6.0m,
+				ValidBet = 6.0m,
+				Settle = 0.0M,
+				Commission = 0.0M,
+				Turnover = 6.0m,
+				WinLoss = -6.0m,
 				Jackpot = 0.0M,
 				AdditionalData = command.Record.AdditionalData
 			}),
