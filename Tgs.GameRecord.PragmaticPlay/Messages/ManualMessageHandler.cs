@@ -1,15 +1,15 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Tgs.GameRecord.PragmaticPlay.Common;
+using Tgs.GameRecord.PragmaticPlay.Core;
 using Tgs.GameRecord.PragmaticPlay.Core.ApplicationServices;
-using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.PragmaticPlay.Messages;
 
 internal class ManualMessageHandler(
 	ILogger<ManualMessageHandler> logger,
-	ICommandService<ManualPullRecordCommand> service) : IMessageHandler<ReadOnlyMemory<byte>>
+	IManualPullRecordDispatcher dispatcher) : IMessageHandler<ReadOnlyMemory<byte>>
 {
 	public ValueTask HandleAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
 	{
@@ -17,21 +17,31 @@ internal class ManualMessageHandler(
 		var message = JsonSerializer.Deserialize<PragmaticPlayGameRecordManualMessage>(json)
 			?? throw new NullReferenceException("The request data resolves to a null value");
 
-		logger.LogInformation("LogOn:{logOn} Subject:{subject} Information Request:{message}",
-			DateTime.Now.ToString("o"),
-			subject,
-			message);
+		logger.LogInformation("{logInformation}",
+			JsonSerializer.Serialize(new
+			{
+				LogOn = DateTime.Now.ToString("u"),
+				Subject = subject,
+				Data = new
+				{
+					message.ApiUrl,
+					message.SecureLogin,
+					message.SecretKey,
+					message.DataType,
+					StartTime = message.StartTime.ToString("u"),
+					EndTime = message.EndTime.ToString("u"),
+				},
+				Message = "This receive message handler."
+			}));
 
-		var command = new ManualPullRecordCommand(
-			ApiUrl: message.ApiUrl,
-			SecureLogin: message.SecureLogin,
-			SecretKey: message.SecretKey,
-			DataType: message.DataType,
-			StartTime: message.StartTime,
-			EndTime: message.EndTime);
-
-		return service.ExecuteAsync(
-			command: command,
+		return dispatcher.PushCommandAsync(
+			command: new ManualPullRecordCommand(
+				ApiUrl: message.ApiUrl,
+				SecureLogin: message.SecureLogin,
+				SecretKey: message.SecretKey,
+				DataType: message.DataType,
+				StartTime: message.StartTime,
+				EndTime: message.EndTime),
 			cancellationToken: cancellationToken);
 	}
 }

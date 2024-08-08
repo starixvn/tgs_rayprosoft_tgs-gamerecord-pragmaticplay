@@ -15,6 +15,5 @@ public static class ServiceCollectionExtensions
 		.AddSingleton<IUtensilRepository, UtensilRepository>()
 		.AddTransient<IHangfireUtensilRepository, HangfireUtensilRepository>()
 		.AddTransient<IHangfireLockRepository>(sp => ActivatorUtilities.CreateInstance<HangfireLockRepository>(sp, redisDatabaseResolver(sp)))
-		.AddTransient<IGameRecordScheduleRepository>((sp) => ActivatorUtilities.CreateInstance<GameRecordScheduleRepository>(sp, mongoClientResolver(sp)))
-		.AddSingleton<IGameRecordScheduleLockRepository>(sp => ActivatorUtilities.CreateInstance<GameRecordScheduleLockRepository>(sp, redisDatabaseResolver(sp)));
+		.AddTransient<IGameRecordScheduleRepository>((sp) => ActivatorUtilities.CreateInstance<GameRecordScheduleRepository>(sp, mongoClientResolver(sp)));
 }

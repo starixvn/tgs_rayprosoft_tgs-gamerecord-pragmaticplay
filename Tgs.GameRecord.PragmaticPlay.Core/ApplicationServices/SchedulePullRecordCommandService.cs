@@ -10,7 +10,6 @@ internal class SchedulePullRecordCommandService(
 	ILogger<SchedulePullRecordCommandService> logger,
 	IOptions<GameRecordInfoOptions> options,
 	TimeProvider timeProvider,
-	IGameRecordScheduleLockRepository scheduleLockRepository,
 	IGameRecordScheduleRepository scheduleRepository,
 	IUtensilRepository utensil,
 	IGameInterfacePragmaticPlayClient client,
@@ -20,131 +19,104 @@ internal class SchedulePullRecordCommandService(
 
 	public async ValueTask ExecuteAsync(SchedulePullRecordCommand command, CancellationToken cancellationToken = default)
 	{
-		if (!await scheduleLockRepository.LockingAsync(
+		var gameRecordSchedule = await scheduleRepository.GetAsync(
 			secureLogin: command.SecureLogin,
 			dataType: command.DataType,
 			cancellationToken: cancellationToken)
-			.ConfigureAwait(false))
-		{
-			logger.LogWarning("LogOn:{logOn} Message:This data type ({DataType}) pull record has been locked.",
-				DateTime.Now.ToString("o"),
-				command.DataType);
-			return;
-		}
-
-		try
-		{
-			var gameRecordSchedule = await scheduleRepository.GetAsync(
+			.ConfigureAwait(false)
+			?? await scheduleRepository.AddAsync(
 				secureLogin: command.SecureLogin,
 				dataType: command.DataType,
+				nextTime: timeProvider.GetUtcNow().AddMinutes(-10),
 				cancellationToken: cancellationToken)
-				.ConfigureAwait(false)
-				?? await scheduleRepository.AddAsync(
-					secureLogin: command.SecureLogin,
-					dataType: command.DataType,
-					nextTime: timeProvider.GetUtcNow().AddMinutes(-10),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
+			.ConfigureAwait(false);
 
-			var startTime = command.DataType switch
+		var startTime = command.DataType switch
+		{
+			var dataType when dataType.Equals("LC", StringComparison.OrdinalIgnoreCase)
+			=> gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.LiveDealerIntervalMinutes),
+			var dataType when dataType.Equals("VSB", StringComparison.OrdinalIgnoreCase)
+			=> gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinutes),
+			_ => gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.IntervalMinutes)
+		};
+
+		var nextTime = startTime;
+		var currentTime = timeProvider.GetUtcNow();
+
+		while (utensil.IsRun(nextTime, currentTime, currentTime))
+		{
+			var result = command.DataType.ToUpper() switch
 			{
 				var dataType when dataType.Equals("LC", StringComparison.OrdinalIgnoreCase)
-				=> gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.LiveDealerIntervalMinutes),
+				=> await client
+				.GameRecordByLiveAsync(
+					apiUrl: command.ApiUrl,
+					secureLogin: command.SecureLogin,
+					secretKey: command.SecretKey,
+					startTime: nextTime,
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false),
 				var dataType when dataType.Equals("VSB", StringComparison.OrdinalIgnoreCase)
-				=> gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.VirtualSportsIntervalMinutes),
-				_ => gameRecordSchedule.NextTime.AddMinutes(-_gameRecordInfoOptions.IntervalMinutes)
+				=> await client
+				.GameRecordByVirtualSportsAsync(
+					apiUrl: command.ApiUrl,
+					secureLogin: command.SecureLogin,
+					secretKey: command.SecretKey,
+					startTime: nextTime,
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false),
+				_ => await client
+				.GameRecordBySlotAsync(
+					apiUrl: command.ApiUrl,
+					secureLogin: command.SecureLogin,
+					secretKey: command.SecretKey,
+					startTime: nextTime,
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false)
 			};
 
-			var nextTime = startTime;
-			var currentTime = timeProvider.GetUtcNow();
+			var gameRecords = result.Items
+				?? Enumerable.Empty<GameRecordData>();
 
-			while (utensil.IsRun(nextTime, currentTime, currentTime))
+			if (result.NextTime.ToDateTimeOffset() == DateTimeOffset.UnixEpoch)
 			{
-				var result = command.DataType.ToUpper() switch
-				{
-					var dataType when dataType.Equals("LC", StringComparison.OrdinalIgnoreCase)
-					=> await client
-					.GameRecordByLiveAsync(
-						apiUrl: command.ApiUrl,
-						secureLogin: command.SecureLogin,
-						secretKey: command.SecretKey,
-						startTime: nextTime,
-						cancellationToken: cancellationToken)
-					.ConfigureAwait(false),
-					var dataType when dataType.Equals("VSB", StringComparison.OrdinalIgnoreCase)
-					=> await client
-					.GameRecordByVirtualSportsAsync(
-						apiUrl: command.ApiUrl,
-						secureLogin: command.SecureLogin,
-						secretKey: command.SecretKey,
-						startTime: nextTime,
-						cancellationToken: cancellationToken)
-					.ConfigureAwait(false),
-					_ => await client
-					.GameRecordBySlotAsync(
-						apiUrl: command.ApiUrl,
-						secureLogin: command.SecureLogin,
-						secretKey: command.SecretKey,
-						startTime: nextTime,
-						cancellationToken: cancellationToken)
-					.ConfigureAwait(false)
-				};
-
-				var gameRecords = result.Items
-					?? Enumerable.Empty<GameRecordData>();
-
-				if (result.NextTime.ToDateTimeOffset() == DateTimeOffset.UnixEpoch)
-				{
-					break;
-				}
-				else
-				{
-					nextTime = result.NextTime.ToDateTimeOffset();
-				}
-
-				logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | currentTime:{currentTime}| while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), currentTime.ToString("O"), currentTime.ToString("O"), utensil.IsRun(nextTime, currentTime, currentTime));
-
-				if (!gameRecords.Any())
-				{
-					continue;
-				}
-
-				foreach (var gameRecord in gameRecords)
-				{
-					logger.LogDebug("LogOn:{logOn} Message: Settlement. GameRecords:{gameRecord}", DateTime.Now.ToString("o"), gameRecord);
-
-					try
-					{
-						await service.ExecuteAsync(
-							command: new(gameRecord),
-							cancellationToken: cancellationToken)
-							.ConfigureAwait(false);
-					}
-					catch (Exception ex)
-					{
-						logger.LogError(ex, "LogOn:{logOn} Message: An exception occurred in this game record.({gameRecord})", DateTime.Now.ToString("o"), gameRecord);
-					}
-				}
+				break;
+			}
+			else
+			{
+				nextTime = result.NextTime.ToDateTimeOffset();
 			}
 
-			await scheduleRepository.UpdateAsync(
-				secureLogin: command.SecureLogin,
-				dataType: command.DataType,
-				nextTime: nextTime,
-				cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
+			logger.LogDebug("DataType:{dataType} | NextTime:{nextTime} | endTime:{endTime} | currentTime:{currentTime}| while{isRun}", command.DataType.ToUpper(), nextTime.ToString("O"), currentTime.ToString("O"), currentTime.ToString("O"), utensil.IsRun(nextTime, currentTime, currentTime));
+
+			if (!gameRecords.Any())
+			{
+				continue;
+			}
+
+			foreach (var gameRecord in gameRecords)
+			{
+				logger.LogDebug("LogOn:{logOn} Message: Settlement. GameRecords:{gameRecord}", DateTime.Now.ToString("o"), gameRecord);
+
+				try
+				{
+					await service.ExecuteAsync(
+						command: new(gameRecord),
+						cancellationToken: cancellationToken)
+						.ConfigureAwait(false);
+				}
+				catch (Exception ex)
+				{
+					logger.LogError(ex, "LogOn:{logOn} Message: An exception occurred in this game record.({gameRecord})", DateTime.Now.ToString("o"), gameRecord);
+				}
+			}
 		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "LogOn:{logOn} Message: Exception.", DateTime.Now.ToString("o"));
-		}
-		finally
-		{
-			_ = await scheduleLockRepository.UnlockAsync(
-				secureLogin: command.SecureLogin,
-				dataType: command.DataType,
-				cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-		}
+
+		await scheduleRepository.UpdateAsync(
+			secureLogin: command.SecureLogin,
+			dataType: command.DataType,
+			nextTime: nextTime,
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 	}
 }

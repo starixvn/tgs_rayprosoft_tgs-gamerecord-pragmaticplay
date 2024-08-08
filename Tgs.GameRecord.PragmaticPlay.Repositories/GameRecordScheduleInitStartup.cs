@@ -1,8 +1,10 @@
-﻿using Tgs.GameRecord.PragmaticPlay.Core;
+﻿using Microsoft.Extensions.Hosting;
 
-namespace Tgs.GameRecord.PragmaticPlay;
+using Tgs.GameRecord.PragmaticPlay.Core;
 
-public sealed class InitStartup(IGameRecordScheduleRepository gameRecordScheduleRepository) : IHostedService
+namespace Tgs.GameRecord.PragmaticPlay.Repositories;
+
+public sealed class GameRecordScheduleInitStartup(IGameRecordScheduleRepository gameRecordScheduleRepository) : IHostedService
 {
 	public async Task StartAsync(CancellationToken cancellationToken)
 	{
