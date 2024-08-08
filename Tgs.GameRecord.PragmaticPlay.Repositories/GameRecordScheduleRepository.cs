@@ -11,7 +11,6 @@ namespace Tgs.GameRecord.PragmaticPlay.Repositories;
 internal class GameRecordScheduleRepository(
 	ILogger<GameRecordScheduleRepository> logger,
 	IOptions<GameRecordInfoOptions> gameRecordInfoOptions,
-	TimeProvider timeProvider,
 	IMongoClient client) : IGameRecordScheduleRepository
 {
 	private readonly GameRecordInfoOptions _gameRecordInfoOptions = gameRecordInfoOptions.Value;
@@ -19,14 +18,13 @@ internal class GameRecordScheduleRepository(
 	public async ValueTask<GameRecordScheduleInfo> AddAsync(string secureLogin, string dataType, DateTimeOffset nextTime, CancellationToken cancellationToken = default)
 	{
 		var collection = GetCollection();
-		var utcDateTime = timeProvider.GetUtcNow().UtcDateTime;
 		var document = new GameRecordSchedule()
 		{
 			SecureLogin = secureLogin,
 			DataType = dataType,
 			NextTime = nextTime.UtcDateTime,
-			CreatedAt = utcDateTime,
-			UpdatedAt = utcDateTime
+			CreatedAt = DateTimeOffset.UtcNow.UtcDateTime,
+			UpdatedAt = DateTimeOffset.UtcNow.UtcDateTime
 		};
 
 		await collection.InsertOneAsync(
@@ -100,17 +98,15 @@ internal class GameRecordScheduleRepository(
 	public async ValueTask UpdateAsync(string secureLogin, string dataType, DateTimeOffset nextTime, CancellationToken cancellationToken = default)
 	{
 		var collection = GetCollection();
-		var utcDateTime = timeProvider.GetUtcNow().UtcDateTime;
 		var builder = Builders<GameRecordSchedule>.Filter;
 		var filter = builder.Eq(x => x.SecureLogin, secureLogin)
 			& builder.Eq(x => x.DataType, dataType);
 
 		var update = Builders<GameRecordSchedule>.Update
 			.Set(s => s.NextTime, nextTime.UtcDateTime)
-			.Set(s => s.UpdatedAt, utcDateTime);
+			.Set(s => s.UpdatedAt, DateTimeOffset.UtcNow.UtcDateTime);
 
-		_ = await collection
-			.UpdateOneAsync(
+		_ = await collection.UpdateOneAsync(
 			filter: filter,
 			update: update,
 			cancellationToken: cancellationToken)
