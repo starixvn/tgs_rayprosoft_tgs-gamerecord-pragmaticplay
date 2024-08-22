@@ -31,7 +31,7 @@ internal class ManualMessageHandler(
 					StartTime = message.StartTime.ToString("u"),
 					EndTime = message.EndTime.ToString("u"),
 				},
-				Message = "This receive message handler."
+				Message = "This message receiving handler."
 			}));
 
 		return dispatcher.PushCommandAsync(
