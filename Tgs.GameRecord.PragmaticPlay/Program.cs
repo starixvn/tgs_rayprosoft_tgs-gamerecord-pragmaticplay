@@ -11,8 +11,9 @@ using Tgs.GameRecord.PragmaticPlay;
 using Tgs.GameRecord.PragmaticPlay.Common;
 using Tgs.GameRecord.PragmaticPlay.Core;
 using Tgs.GameRecord.PragmaticPlay.Messages;
-using Tgs.MessageQueue.Nats.Serializers;
 using Tgs.GameRecord.PragmaticPlay.Repositories;
+
+using Tgs.MessageQueue.Nats.Serializers;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
 
@@ -89,6 +90,13 @@ builder.Services
 		configuration.GetSection("GameRecordInfo").Bind(options);
 	})
 	.Services
+	.AddOptions<PolicySettingsOptions>()
+	.Configure((PolicySettingsOptions options, IServiceProvider sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		configuration.GetSection("PolicySettings").Bind(options);
+	})
+	.Services
 	.AddMemoryCache()
 	.AddSingleton(TimeProvider.System)
 	.AddSingleton<RedisConnectionManager>()
@@ -103,6 +111,11 @@ builder.Services
 		var configuration = sp.GetRequiredService<IConfiguration>();
 		options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceClientBaseUrl")!;
 	})
+	.AddGameRecordHandleClient(httpClientBuilder => httpClientBuilder.ConfigureHttpClient((sp, http) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		http.BaseAddress = config.GetValue<Uri>("GameRecord:GameRecordHandleClientBaseUrl");
+	}))
 	.AddGameRecordCore()
 	.AddGameRecordRepositories(
 	mongoClientResolver: (sp) => sp.GetRequiredService<MongoDBConnectionManager>().MongoClient,
@@ -122,7 +135,8 @@ builder.Services
 		.AddHandler<ScheduleMessageHandler>(PragmaticPlayNatsConst.SchedulePublish, PragmaticPlayNatsConst.SchedulePublish)
 		.AddHandler<ManualMessageHandler>(PragmaticPlayNatsConst.ManualPublish, PragmaticPlayNatsConst.ManualPublish))
 	 .ClearAllExchanges()
-	.AddNatsGlobPatternExchange("*");
+	.AddNatsGlobPatternExchange(PragmaticPlayNatsConst.SchedulePublish)
+	.AddNatsGlobPatternExchange(PragmaticPlayNatsConst.ManualPublish);
 
 builder.Services
 	.AddOpenTelemetry()

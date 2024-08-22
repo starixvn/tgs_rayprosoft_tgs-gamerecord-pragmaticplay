@@ -29,7 +29,7 @@ internal class ScheduleMessageHandler(
 					message.SecretKey,
 					message.DataType
 				},
-				Message = "This receive message handler."
+				Message = "This message receiving handler."
 			}));
 
 		return dispatcher.PushCommandAsync(

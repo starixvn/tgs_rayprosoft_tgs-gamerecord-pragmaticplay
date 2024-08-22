@@ -13,7 +13,7 @@ internal class JobExecuteCommandService(
 {
 	public ValueTask ExecuteAsync(JobExecuteCommand command, CancellationToken cancellationToken = default)
 	{
-		var parameters = new PragmaticPlayGameRecordScheduleMessage
+		var message = new PragmaticPlayGameRecordScheduleMessage
 		{
 			ApiUrl = command.ApiUrl,
 			SecureLogin = command.SecureLogin,
@@ -21,11 +21,24 @@ internal class JobExecuteCommandService(
 			DataType = command.DataType
 		};
 
-		logger.LogInformation("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
+		logger.LogInformation("{logInformation}",
+			JsonSerializer.Serialize(new
+			{
+				LogOn = DateTime.Now.ToString("u"),
+				Subject = PragmaticPlayNatsConst.SchedulePublish,
+				Data = new
+				{
+					message.ApiUrl,
+					message.SecureLogin,
+					message.SecretKey,
+					message.DataType
+				},
+				Message = "This message publishing handler."
+			}));
 
 		return messageSender.PublishAsync(
 			subject: PragmaticPlayNatsConst.SchedulePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(parameters)),
+			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message)),
 			cancellationToken: cancellationToken);
 	}
 }
