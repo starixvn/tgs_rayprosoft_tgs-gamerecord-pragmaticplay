@@ -57,7 +57,7 @@ public class PragmaticPlayTransferController : ControllerBase
 		PragmaticPlayGameRecordManualMessage source)
 		=> messageSender.PublishAsync(
 			subject: PragmaticPlayNatsConst.ManualPublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
+			data: JsonSerializer.SerializeToUtf8Bytes(source),
 			cancellationToken: HttpContext.RequestAborted);
 
 	/// <summary>
@@ -101,6 +101,6 @@ public class PragmaticPlayTransferController : ControllerBase
 		PragmaticPlayGameRecordScheduleMessage source)
 		=> messageSender.PublishAsync(
 			subject: PragmaticPlayNatsConst.SchedulePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
+			data: JsonSerializer.SerializeToUtf8Bytes(source),
 			cancellationToken: HttpContext.RequestAborted);
 }
